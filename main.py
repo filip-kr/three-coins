@@ -1,19 +1,23 @@
 if __name__ == '__main__':
     import three_coins
+    import line
 
     input('Enter your question, focus on it, and press ENTER to start tossing coins\n')
 
-    count = 1
     hexagram = []
 
-    while count < 7:
-        line = three_coins.toss()
-        hexagram.insert(0, line)
-
-        print(str(count) + ' : ' + str(hexagram[0]))
+    count = 0
+    while count < 6:
+        coin_toss_result = three_coins.toss()
+        hexagram.insert(count, coin_toss_result)
 
         count += 1
-        input()
+        input('Coin toss: ' + str(count) + '/6')
+        print('\nPresent:') if count == 6 else None
 
     hexagram.reverse()
-    print(hexagram)
+
+    for coin_toss_result in hexagram:
+        print(line.draw(coin_toss_result))
+
+    print('\n')
