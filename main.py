@@ -1,32 +1,23 @@
 if __name__ == '__main__':
-    import three_coins
-    import line
+    from hexagram import Hexagram
+    from coin import Coin
+    from linedrawer import LineDrawer
 
+    hexagram = Hexagram()
     input('Enter your question, focus on it, and press ENTER to start tossing coins: ')
     print('\nCoin toss round:')
 
-    hexagram = []
-    binary = []
-
     count = 0
     while count < 6:
-        coin_toss_result = three_coins.toss()
-        hexagram.insert(count, + coin_toss_result)
-
-        if coin_toss_result == 6 or coin_toss_result == 8:
-            binary.insert(count, '0')
-        else:
-            binary.insert(count, '1')
-
+        hexagram.__add__(count, Coin.toss_three())
         count += 1
         input(str(count) + '/6')
 
-    hexagram.reverse()
-    binary = ''.join(binary)
+    hex_lines = hexagram.__reversed__()
+    hex_binary = hexagram.__str__()
 
     print('\nPRESENT:')
+    for hex_line in hex_lines:
+        print(LineDrawer.draw(hex_line))
 
-    for coin_toss_result in hexagram:
-        print(line.draw(coin_toss_result))
-
-    print(binary)
+    print(hex_binary)
