@@ -10,6 +10,7 @@ class Hexagram:
                 binary += '0'
             else:
                 binary += '1'
+
         return binary
 
     def __reversed__(self):

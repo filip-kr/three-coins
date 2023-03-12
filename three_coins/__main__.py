@@ -1,15 +1,16 @@
-if __name__ == '__main__':
-    from hexagram import Hexagram
-    from coin import Coin
-    from linedrawer import LineDrawer
+import three_coins.coin as coin
+import three_coins.line as line
+from three_coins.hexagram import Hexagram
 
+
+def main():
     hexagram = Hexagram()
     input('Enter your question, focus on it, and press ENTER to start tossing coins: ')
     print('\nCoin toss round:')
 
     count = 0
     while count < 6:
-        hexagram.__add__(count, Coin.toss_three())
+        hexagram.__add__(count, coin.toss_three())
         count += 1
         input(str(count) + '/6')
 
@@ -18,6 +19,6 @@ if __name__ == '__main__':
 
     print('\nPRESENT:')
     for hex_line in hex_lines:
-        print(LineDrawer.draw(hex_line))
+        print(line.draw(hex_line))
 
     print(hex_binary)
