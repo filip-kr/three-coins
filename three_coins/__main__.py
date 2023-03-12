@@ -5,20 +5,12 @@ from three_coins.hexagram import Hexagram
 
 def main():
     hexagram = Hexagram()
-    input('Enter your question, focus on it, and press ENTER to start tossing coins: ')
-    print('\nCoin toss round:')
+    input('Enter your question, focus on it, and press ENTER to start tossing coins: \n')
 
     count = 0
     while count < 6:
-        hexagram.__add__(count, coin.toss_three())
+        coin_toss_result = coin.toss_three()
+        hexagram.__add__(count, coin_toss_result)
         count += 1
-        input(str(count) + '/6')
 
-    hex_lines = hexagram.__reversed__()
-    hex_binary = hexagram.__str__()
-
-    print('\nPRESENT:')
-    for hex_line in hex_lines:
-        print(line.draw(hex_line))
-
-    print(hex_binary)
+    reversed = hexagram.__reversed__()

@@ -3,7 +3,7 @@ green = '\033[0;32m'
 color_reset = '\033[0;0m'
 
 
-def draw(coin_toss_result):
+def draw(coin_toss_result: int) -> str:
     half_line = __draw_yy(9) + ' ' * 9 + __draw_yy(9) + color_reset
     full_line = __draw_yy(27) + color_reset
 
@@ -18,10 +18,10 @@ def draw(coin_toss_result):
             return red + full_line
 
 
-def __draw_yy(char_number):
+def __draw_yy(char_count: int) -> str:
     yin_yang = ''
     count = 0
-    while count < char_number:
+    while count < char_count:
         yin_yang += chr(9775)
         count += 1
 

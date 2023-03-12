@@ -1,7 +1,7 @@
 import random
 
 
-def toss_three():
+def toss_three() -> int:
     result = 0
     count = 0
     while count < 3:
