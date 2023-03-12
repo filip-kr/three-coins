@@ -20,6 +20,7 @@ def draw(coin_toss_result: int) -> str:
 
 def __draw_yy(char_count: int) -> str:
     yin_yang = ''
+
     count = 0
     while count < char_count:
         yin_yang += chr(9775)
