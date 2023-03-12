@@ -1,11 +1,15 @@
+import three_coins.helper.cli as cli
 import three_coins.helper.bit as bit_helper
 import three_coins.helper.coin as coin
 import three_coins.db.conn as conn
 
 
-def main():
-    input('Enter your question, focus on it, and press ENTER to start tossing coins: \n')
+def intro():
+    cli.intro()
+    cli.newline()
 
+
+def main():
     lines = []
     binary = []
     reverse_binary = []
@@ -20,9 +24,17 @@ def main():
         reverse_binary.insert(count, str(reverse_bit))
 
         count += 1
+        cli.loading(count)
+
+    cli.newline()
 
     hexagram = conn.get_by_binary(binary)
     reverse_hexagram = conn.get_by_binary(reverse_binary)
 
-    print(hexagram)
-    print(reverse_hexagram)
+    cli.hex_info(hexagram)
+    for line in reversed(lines):
+        cli.draw_line(line)
+    cli.newline()
+
+    print('REVERSE:')
+    cli.newline()
