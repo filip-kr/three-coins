@@ -1,3 +1,6 @@
+# Cache
 __pycache__/
 three_coins/__pycache__/
+
+# IDE
 .idea
