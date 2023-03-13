@@ -1,7 +1,6 @@
 def get(coin_toss_result: int) -> int:
-    if coin_toss_result == 6 or coin_toss_result == 8:
-        bit = 0
-    else:
-        bit = 1
+    return 0 if coin_toss_result == 6 or coin_toss_result == 8 else 1
 
-    return bit
+
+def get_reverse(coin_toss_result: int) -> int:
+    return 1 if coin_toss_result == 6 or coin_toss_result == 7 else 0
