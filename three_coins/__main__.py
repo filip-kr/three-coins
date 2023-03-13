@@ -1,9 +1,5 @@
-import three_coins.helper.bit as bit_helper
-import three_coins.helper.coin as coin
-import three_coins.db.conn as conn
-import three_coins.gui.root as root
-
-root.mainloop()
+from db import conn
+from helper import bit, coin
 
 
 def main():
@@ -15,10 +11,13 @@ def main():
     while count < 6:
         coin_toss_result = coin.toss_three()
         lines.insert(count, coin_toss_result)
-        bit = bit_helper.get(coin_toss_result)
-        binary.insert(count, str(bit))
-        reverse_bit = bit_helper.get_reverse(coin_toss_result)
+
+        line_bit = bit.get(coin_toss_result)
+        binary.insert(count, str(line_bit))
+
+        reverse_bit = bit.get_reverse(coin_toss_result)
         reverse_binary.insert(count, str(reverse_bit))
+
         input(str(count) + '/6')
         count += 1
 
