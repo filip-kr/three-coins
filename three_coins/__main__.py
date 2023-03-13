@@ -1,6 +1,9 @@
 import three_coins.helper.bit as bit_helper
 import three_coins.helper.coin as coin
 import three_coins.db.conn as conn
+import three_coins.gui.root as root
+
+root.mainloop()
 
 
 def main():
