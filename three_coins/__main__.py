@@ -1,31 +1,34 @@
 from db import conn
-from helper import bit, coin
+from gui import root, ttk
+from helper.hex import ProtoHexagram
+from helper.counter import Counter
 
 
 def main():
-    lines = []
-    binary = []
-    reverse_binary = []
+    proto_hex = ProtoHexagram()
+    counter = Counter()
 
-    count = 0
-    while count < 6:
-        coin_toss_result = coin.toss_three()
-        lines.insert(count, coin_toss_result)
+    def __get_hex_line():
+        if counter.count < 6:
+            proto_hex.add_line(counter.count)
+            print(proto_hex.lines[counter.count])
+            counter.add(1)
+        else:
+            true_hex = conn.get_by_binary(proto_hex.binary)
+            print(true_hex, proto_hex.lines)
 
-        line_bit = bit.get(coin_toss_result)
-        binary.insert(count, str(line_bit))
+            if 6 not in proto_hex.lines and 9 not in proto_hex.lines:
+                exit('No changing lines')
 
-        reverse_bit = bit.get_reverse(coin_toss_result)
-        reverse_binary.insert(count, str(reverse_bit))
+            reverse_hex = conn.get_by_binary(proto_hex.reverse_binary)
+            print(reverse_hex)
 
-        input(str(count) + '/6')
-        count += 1
+    qstn_label = ttk.Label(root, text='What is your question?')
+    qstn_label.pack()
 
-    hexagram = conn.get_by_binary(binary)
-    print(hexagram, lines)
+    qstn_txtbox = ttk.Entry(root, textvariable=qstn_label)
+    qstn_txtbox.pack()
+    qstn_txtbox.focus()
 
-    if 6 not in lines and 9 not in lines:
-        exit('No changing lines')
-
-    reverse_hexagram = conn.get_by_binary(reverse_binary)
-    print(reverse_hexagram)
+    ttk.Button(root, text='Toss coins', command=__get_hex_line).pack()
+    root.mainloop()

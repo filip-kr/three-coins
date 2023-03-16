@@ -1,33 +1,27 @@
 import tkinter as tk
 from tkinter import ttk
 
-__root = tk.Tk()
+root = tk.Tk()
 
 
-def __show_label():
-    ttk.Label(__root, text='What is your question?').pack()
-
-
-def __mainloop():
+def __prepare_root():
     try:
         from ctypes import windll
     except ImportError:
-        __root.iconbitmap('@gui/asset/icon.xbm')
+        root.iconbitmap('@gui/asset/icon.xbm')
     else:
         windll.shcore.SetProcessDpiAwareness(1)
-        __root.iconbitmap('gui/asset/icon.ico')
+        root.iconbitmap('gui/asset/icon.ico')
     finally:
-        __root.title('Three Coins')
+        root.title('Three Coins')
         window_width = 800
         window_height = 600
-        screen_width = __root.winfo_screenwidth()
-        screen_height = __root.winfo_screenheight()
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
         center_x = int(screen_width / 2 - window_width / 2)
         center_y = int(screen_height / 2 - window_height / 2)
-        __root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-        __root.resizable(False, False)
-        __root.mainloop()
+        root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+        root.resizable(False, False)
 
 
-__show_label()
-__mainloop()
+__prepare_root()
