@@ -1,5 +1,5 @@
 from db import conn
-from gui import root, ttk
+from gui import root, tk, ttk
 from helper.hex import ProtoHexagram
 from helper.counter import Counter
 
@@ -18,17 +18,22 @@ def main():
             print(true_hex, proto_hex.lines)
 
             if 6 not in proto_hex.lines and 9 not in proto_hex.lines:
-                exit('No changing lines')
+                print('No changing lines')
 
             reverse_hex = conn.get_by_binary(proto_hex.reverse_binary)
             print(reverse_hex)
 
     qstn_label = ttk.Label(root, text='What is your question?')
-    qstn_label.pack()
+    qstn_label.pack(ipady=20)
 
-    qstn_txtbox = ttk.Entry(root, textvariable=qstn_label)
+    qstn_txtbox = tk.Text(root, height=4, width=40)
     qstn_txtbox.pack()
     qstn_txtbox.focus()
 
-    ttk.Button(root, text='Toss coins', command=__get_hex_line).pack()
+    toss_btn = ttk.Button(root, text='Toss coins', command=__get_hex_line)
+    toss_btn.pack(ipadx=10, ipady=10)
+
+    rst_btn = ttk.Button(root, text='Reset', command=__get_hex_line)
+    rst_btn.pack(ipadx=10, ipady=10)
+
     root.mainloop()
