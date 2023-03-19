@@ -107,3 +107,10 @@ def draw_reverse_info(reverse_hex: tuple):
 
 def draw_no_change():
     right_info_canvas.create_text((210, 50), text='No changing lines')
+
+
+def canvas_reset():
+    left_hex_canvas.delete('all')
+    right_hex_canvas.delete('all')
+    left_info_canvas.delete('all')
+    right_info_canvas.delete('all')

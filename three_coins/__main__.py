@@ -4,7 +4,7 @@ from gui.top import btns
 from gui.bottom import \
     draw_line_left, draw_reverse_hex, \
     draw_true_info, draw_reverse_info, \
-    draw_no_change
+    draw_no_change, canvas_reset
 from helper.proto_hex import proto_hex
 from helper.counter import counter
 
@@ -31,6 +31,7 @@ def main():
     def __reset():
         proto_hex.reset()
         counter.reset()
+        canvas_reset()
 
     toss_btn = ttk.Button(root, text='Toss coins', command=__get_hex_line)
     toss_btn.pack(in_=btns, side=tk.LEFT, ipadx=10, ipady=10)
