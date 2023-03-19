@@ -1,5 +1,6 @@
 from db import conn
 from gui import root, tk, ttk
+from gui.top import btns
 from helper.hex import ProtoHexagram
 from helper.counter import Counter
 
@@ -23,17 +24,10 @@ def main():
             reverse_hex = conn.get_by_binary(proto_hex.reverse_binary)
             print(reverse_hex)
 
-    qstn_label = ttk.Label(root, text='What is your question?')
-    qstn_label.pack(ipady=20)
-
-    qstn_txtbox = tk.Text(root, height=4, width=40)
-    qstn_txtbox.pack()
-    qstn_txtbox.focus()
-
     toss_btn = ttk.Button(root, text='Toss coins', command=__get_hex_line)
-    toss_btn.pack(ipadx=10, ipady=10)
+    toss_btn.pack(in_=btns, side=tk.LEFT, ipadx=10, ipady=10)
 
     rst_btn = ttk.Button(root, text='Reset', command=__get_hex_line)
-    rst_btn.pack(ipadx=10, ipady=10)
+    rst_btn.pack(in_=btns, side=tk.RIGHT, ipadx=10, ipady=10)
 
     root.mainloop()
