@@ -13,7 +13,7 @@ else:
 finally:
     root.title('Three Coins')
     window_width = 800
-    window_height = 600
+    window_height = 800
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     center_x = int(screen_width / 2 - window_width / 2)

@@ -1,13 +1,25 @@
 from gui import root, tk, ttk
 
+overframe = ttk.Frame(root, borderwidth=5)
+overframe.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=20, pady=20)
+
 hex_frame = ttk.Frame(root, borderwidth=5, relief='sunken')
-hex_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=20, pady=20)
+hex_frame.pack(in_=overframe, side=tk.TOP)
+
+info_frame = ttk.Frame(root, borderwidth=5, relief='raised')
+info_frame.pack(in_=overframe, side=tk.BOTTOM, fill=tk.BOTH)
 
 left_hex_canvas = tk.Canvas(root, height=350)
-left_hex_canvas.pack(in_=hex_frame, side=tk.LEFT, fill=tk.BOTH)
+left_hex_canvas.pack(in_=hex_frame, side=tk.LEFT)
 
 right_hex_canvas = tk.Canvas(root, height=350)
-right_hex_canvas.pack(in_=hex_frame, side=tk.RIGHT, fill=tk.BOTH)
+right_hex_canvas.pack(in_=hex_frame, side=tk.RIGHT)
+
+left_info_canvas = tk.Canvas(root)
+left_info_canvas.pack(in_=info_frame, side=tk.LEFT)
+
+right_info_canvas = tk.Canvas(root)
+right_info_canvas.pack(in_=info_frame, side=tk.RIGHT)
 
 
 def __get_left_coordinates(count: int):
@@ -61,10 +73,9 @@ def draw_line_left(count: int, coin_toss_result: int):
 
 
 def draw_reverse_hex(reverse_binary: list):
-    print(reverse_binary)
-    x0 = 120
+    x0 = 110
     y0 = 300
-    x1 = 320
+    x1 = 310
     y1 = 300
     width = 20
 
@@ -76,3 +87,23 @@ def draw_reverse_hex(reverse_binary: list):
 
         y0 -= 50
         y1 -= 50
+
+
+def draw_true_info(true_hex: tuple):
+    number = '#' + true_hex[0]
+    name = true_hex[1]
+
+    left_info_canvas.create_text((140, 50), text=number)
+    left_info_canvas.create_text((140, 100), text=name)
+
+
+def draw_reverse_info(reverse_hex: tuple):
+    number = '#' + reverse_hex[0]
+    name = reverse_hex[1]
+
+    right_info_canvas.create_text((210, 50), text=number)
+    right_info_canvas.create_text((210, 100), text=name)
+
+
+def draw_no_change():
+    right_info_canvas.create_text((210, 50), text='No changing lines')
