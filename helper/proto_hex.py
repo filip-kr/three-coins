@@ -18,3 +18,8 @@ class ProtoHexagram:
 
     def get_binary(self) -> list:
         return self.binary
+
+    def reset(self) -> None:
+        self.lines = []
+        self.binary = []
+        self.reverse_binary = []

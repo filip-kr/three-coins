@@ -3,3 +3,6 @@ class Counter:
 
     def add(self, incr: int) -> None:
         self.count += incr
+
+    def reset(self) -> None:
+        self.count = 0
