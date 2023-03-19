@@ -1,7 +1,7 @@
 from db import conn
 from gui import tk, ttk, root
 from gui.top import btns
-from gui.bottom import draw_line_left
+from gui.bottom import draw_line_left, draw_reverse_hex
 from helper.proto_hex import proto_hex
 from helper.counter import counter
 
@@ -25,6 +25,7 @@ def main():
 
                 reverse_hex = conn.get_by_binary(proto_hex.reverse_binary)
                 print(reverse_hex)
+                draw_reverse_hex(proto_hex.reverse_binary)
 
     def __reset():
         proto_hex.reset()

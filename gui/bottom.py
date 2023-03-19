@@ -61,9 +61,18 @@ def draw_line_left(count: int, coin_toss_result: int):
 
 
 def draw_reverse_hex(reverse_binary: list):
-    right_hex_canvas.create_line((120, 300), (320, 300), width=20)
-    right_hex_canvas.create_line((120, 250), (320, 250), width=20)
-    right_hex_canvas.create_line((120, 200), (320, 200), width=20)
-    right_hex_canvas.create_line((120, 150), (320, 150), width=20)
-    right_hex_canvas.create_line((120, 100), (320, 100), width=20)
-    right_hex_canvas.create_line((120, 50), (320, 50), width=20)
+    print(reverse_binary)
+    x0 = 120
+    y0 = 300
+    x1 = 320
+    y1 = 300
+    width = 20
+
+    for bit in reverse_binary:
+        if bit == '1':
+            right_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
+        else:
+            right_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
+
+        y0 -= 50
+        y1 -= 50
