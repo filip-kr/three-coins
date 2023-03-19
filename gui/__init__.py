@@ -6,10 +6,10 @@ root = tk.Tk()
 try:
     from ctypes import windll
 except ImportError:
-    root.iconbitmap('@gui/asset/icon.xbm')
+    root.iconbitmap('@gui/asset/icon/icon.xbm')
 else:
     windll.shcore.SetProcessDpiAwareness(1)
-    root.iconbitmap('gui/asset/icon.ico')
+    root.iconbitmap('gui/asset/icon/icon.ico')
 finally:
     root.title('Three Coins')
     window_width = 800

@@ -6,3 +6,6 @@ class Counter:
 
     def reset(self) -> None:
         self.count = 0
+
+
+counter = Counter()

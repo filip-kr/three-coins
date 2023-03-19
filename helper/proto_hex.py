@@ -23,3 +23,6 @@ class ProtoHexagram:
         self.lines = []
         self.binary = []
         self.reverse_binary = []
+
+
+proto_hex = ProtoHexagram()
