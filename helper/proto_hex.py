@@ -6,7 +6,7 @@ class ProtoHexagram:
     binary = []
     reverse_binary = []
 
-    def add_line(self, index: int) -> None:
+    def add_line(self, index: int):
         coin_toss_result = coin.toss_three()
         self.lines.insert(index, coin_toss_result)
 
@@ -19,7 +19,7 @@ class ProtoHexagram:
     def get_binary(self) -> list:
         return self.binary
 
-    def reset(self) -> None:
+    def reset(self):
         self.lines = []
         self.binary = []
         self.reverse_binary = []

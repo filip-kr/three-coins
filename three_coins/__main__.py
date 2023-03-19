@@ -1,7 +1,7 @@
 from db import conn
 from gui import tk, ttk, root
-from gui.top import btns
-from gui.bottom import \
+from gui.input import btns, qstn_reset
+from gui.output import \
     draw_line_left, draw_reverse_hex, \
     draw_true_info, draw_reverse_info, \
     draw_no_change, canvas_reset
@@ -29,8 +29,9 @@ def main():
                 draw_reverse_info(reverse_hex)
 
     def __reset():
-        proto_hex.reset()
+        qstn_reset()
         counter.reset()
+        proto_hex.reset()
         canvas_reset()
 
     toss_btn = ttk.Button(root, text='Toss coins', command=__get_hex_line)

@@ -22,7 +22,7 @@ right_info_canvas = tk.Canvas(root)
 right_info_canvas.pack(in_=info_frame, side=tk.RIGHT)
 
 
-def __get_left_coordinates(count: int):
+def __get_left_coordinates(count: int) -> dict:
     x0 = 50
     y0 = 300
     x1 = 250
