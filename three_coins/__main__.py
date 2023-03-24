@@ -5,8 +5,8 @@ from gui.output import \
     draw_line_left, draw_reverse_hex, \
     draw_true_info, draw_reverse_info, \
     draw_no_change, canvas_reset
-from helper.proto_hex import proto_hex
 from helper.counter import counter
+from helper.proto_hex import proto_hex
 
 
 def main():
@@ -17,6 +17,7 @@ def main():
             counter.add(1)
 
             if counter.count == 6:
+                proto_hex.binary.reverse()
                 true_hex = conn.get_by_binary(proto_hex.binary)
                 draw_true_info(true_hex)
 
@@ -24,6 +25,7 @@ def main():
                     draw_no_change()
                     return
 
+                proto_hex.reverse_binary.reverse()
                 reverse_hex = conn.get_by_binary(proto_hex.reverse_binary)
                 draw_reverse_hex(proto_hex.reverse_binary)
                 draw_reverse_info(reverse_hex)

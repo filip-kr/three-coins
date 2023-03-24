@@ -74,9 +74,9 @@ def draw_line_left(count: int, coin_toss_result: int):
 
 def draw_reverse_hex(reverse_binary: list):
     x0 = 110
-    y0 = 300
+    y0 = 50
     x1 = 310
-    y1 = 300
+    y1 = 50
     width = 20
 
     for bit in reverse_binary:
@@ -85,8 +85,8 @@ def draw_reverse_hex(reverse_binary: list):
         else:
             right_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
 
-        y0 -= 50
-        y1 -= 50
+        y0 += 50
+        y1 += 50
 
 
 def draw_true_info(true_hex: tuple):
