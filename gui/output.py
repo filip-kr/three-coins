@@ -1,25 +1,25 @@
 from gui import root, tk, ttk
 
-overframe = ttk.Frame(root, borderwidth=5)
-overframe.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=20, pady=20)
+__overframe = ttk.Frame(root, borderwidth=5)
+__overframe.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=20, pady=20)
 
-hex_frame = ttk.Frame(root, borderwidth=5, relief='sunken')
-hex_frame.pack(in_=overframe, side=tk.TOP)
+__hex_frame = ttk.Frame(root, borderwidth=5, relief='sunken')
+__hex_frame.pack(in_=__overframe, side=tk.TOP)
 
-info_frame = ttk.Frame(root, borderwidth=5, relief='raised')
-info_frame.pack(in_=overframe, side=tk.BOTTOM, fill=tk.BOTH)
+__info_frame = ttk.Frame(root, borderwidth=5, relief='raised')
+__info_frame.pack(in_=__overframe, side=tk.BOTTOM, fill=tk.BOTH)
 
-left_hex_canvas = tk.Canvas(root, height=350)
-left_hex_canvas.pack(in_=hex_frame, side=tk.LEFT)
+__left_hex_canvas = tk.Canvas(root, height=350)
+__left_hex_canvas.pack(in_=__hex_frame, side=tk.LEFT)
 
-right_hex_canvas = tk.Canvas(root, height=350)
-right_hex_canvas.pack(in_=hex_frame, side=tk.RIGHT)
+__right_hex_canvas = tk.Canvas(root, height=350)
+__right_hex_canvas.pack(in_=__hex_frame, side=tk.RIGHT)
 
-left_info_canvas = tk.Canvas(root)
-left_info_canvas.pack(in_=info_frame, side=tk.LEFT)
+__left_info_canvas = tk.Canvas(root)
+__left_info_canvas.pack(in_=__info_frame, side=tk.LEFT)
 
-right_info_canvas = tk.Canvas(root)
-right_info_canvas.pack(in_=info_frame, side=tk.RIGHT)
+__right_info_canvas = tk.Canvas(root)
+__right_info_canvas.pack(in_=__info_frame, side=tk.RIGHT)
 
 
 def __get_left_coordinates(count: int) -> dict:
@@ -63,13 +63,13 @@ def draw_line_left(count: int, coin_toss_result: int):
 
     match coin_toss_result:
         case 6:
-            left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40), fill='red')
+            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40), fill='red')
         case 7:
-            left_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
+            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
         case 8:
-            left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
+            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
         case 9:
-            left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, fill='red')
+            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, fill='red')
 
 
 def draw_reverse_hex(reverse_binary: list):
@@ -81,9 +81,9 @@ def draw_reverse_hex(reverse_binary: list):
 
     for bit in reverse_binary:
         if bit == '1':
-            right_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
+            __right_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
         else:
-            right_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
+            __right_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
 
         y0 += 50
         y1 += 50
@@ -93,24 +93,24 @@ def draw_true_info(true_hex: tuple):
     number = '#' + true_hex[0]
     name = true_hex[1]
 
-    left_info_canvas.create_text((140, 50), text=number)
-    left_info_canvas.create_text((140, 100), text=name)
+    __left_info_canvas.create_text((140, 50), text=number)
+    __left_info_canvas.create_text((140, 100), text=name)
 
 
 def draw_reverse_info(reverse_hex: tuple):
     number = '#' + reverse_hex[0]
     name = reverse_hex[1]
 
-    right_info_canvas.create_text((210, 50), text=number)
-    right_info_canvas.create_text((210, 100), text=name)
+    __right_info_canvas.create_text((210, 50), text=number)
+    __right_info_canvas.create_text((210, 100), text=name)
 
 
 def draw_no_change():
-    right_info_canvas.create_text((210, 50), text='No changing lines')
+    __right_info_canvas.create_text((210, 50), text='No changing lines')
 
 
 def canvas_reset():
-    left_hex_canvas.delete('all')
-    right_hex_canvas.delete('all')
-    left_info_canvas.delete('all')
-    right_info_canvas.delete('all')
+    __left_hex_canvas.delete('all')
+    __right_hex_canvas.delete('all')
+    __left_info_canvas.delete('all')
+    __right_info_canvas.delete('all')

@@ -27,7 +27,7 @@ def __show_instructions():
                  '5. Toss coins until a hexagram is formed \n' \
                  '6. Consult external resources of choice for detailed I Ching readings\n\n' \
                  'Left hexagram explains your current predicament in regards to your question,\n' \
-                 'with its lines explaining what can be done about it. \n\n' \
+                 'with its changing lines explaining what can be done about it. \n\n' \
                  'Right hexagram foretells the possible future if Oracle\'s advice is heeded.\n'
 
     instr_label = ttk.Label(instr_win, text=instr_text)
@@ -38,25 +38,29 @@ def __show_about():
     pass
 
 
-try:
-    from ctypes import windll
-except ImportError:
-    root.iconbitmap('@gui/asset/icon.xbm')
-else:
-    windll.shcore.SetProcessDpiAwareness(1)
-    root.iconbitmap('gui/asset/icon.ico')
-finally:
-    root.title('Three Coins')
-    win_width = 800
-    win_height = 800
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    center_x = int(screen_width / 2 - win_width / 2)
-    center_y = int(screen_height / 2 - win_height / 2)
-    root.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
-    root.resizable(False, False)
+def __prepare_root():
+    try:
+        from ctypes import windll
+    except ImportError:
+        root.iconbitmap('@gui/asset/icon.xbm')
+    else:
+        windll.shcore.SetProcessDpiAwareness(1)
+        root.iconbitmap('gui/asset/icon.ico')
+    finally:
+        root.title('Three Coins')
+        win_width = 800
+        win_height = 800
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        center_x = int(screen_width / 2 - win_width / 2)
+        center_y = int(screen_height / 2 - win_height / 2)
+        root.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
+        root.resizable(False, False)
 
-    root_menu = tk.Menu(root)
-    root.config(menu=root_menu)
-    root_menu.add_command(label='Instructions', command=__show_instructions)
-    root_menu.add_command(label='About', command=__show_about)
+        root_menu = tk.Menu(root)
+        root.config(menu=root_menu)
+        root_menu.add_command(label='Instructions', command=__show_instructions)
+        root_menu.add_command(label='About', command=__show_about)
+
+
+__prepare_root()
