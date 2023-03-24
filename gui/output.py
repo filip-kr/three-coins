@@ -101,8 +101,8 @@ def draw_reverse_info(reverse_hex: tuple):
     number = '#' + reverse_hex[0]
     name = reverse_hex[1]
 
-    __right_info_canvas.create_text((210, 50), text=number, font=('TkDefaultFont', 15))
-    __right_info_canvas.create_text((210, 100), text=name, font=('TkDefaultFont', 20))
+    __right_info_canvas.create_text((200, 50), text=number, font=('TkDefaultFont', 15))
+    __right_info_canvas.create_text((200, 100), text=name, font=('TkDefaultFont', 20))
 
 
 def draw_no_change():
