@@ -1,6 +1,7 @@
 from db import conn
 from gui import tk, ttk, root
-from gui.input import btns, qstn_reset
+from gui.input import btns, \
+    qstn_reset, qstn_disable, qstn_enable
 from gui.output import \
     draw_line_left, draw_reverse_hex, \
     draw_true_info, draw_reverse_info, \
@@ -11,12 +12,16 @@ from helper.proto_hex import proto_hex
 
 def main():
     def __get_hex_line():
+        qstn_disable()
+
         if counter.count < 6:
             proto_hex.add_line(counter.count)
             draw_line_left(counter.count, proto_hex.lines[counter.count])
             counter.add(1)
 
             if counter.count == 6:
+                toss_btn.config(state=tk.DISABLED)
+
                 proto_hex.binary.reverse()
                 true_hex = conn.get_by_binary(proto_hex.binary)
                 draw_true_info(true_hex)
@@ -31,6 +36,8 @@ def main():
                 draw_reverse_info(reverse_hex)
 
     def __reset():
+        qstn_enable()
+        toss_btn.config(state=tk.NORMAL)
         qstn_reset()
         counter.reset()
         proto_hex.reset()

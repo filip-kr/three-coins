@@ -18,3 +18,11 @@ __qstn_txtbox.focus()
 
 def qstn_reset():
     __qstn_txtbox.delete('1.0', tk.END)
+
+
+def qstn_disable():
+    __qstn_txtbox.config(state=tk.DISABLED)
+
+
+def qstn_enable():
+    __qstn_txtbox.config(state=tk.NORMAL)
