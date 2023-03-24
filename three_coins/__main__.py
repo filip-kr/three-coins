@@ -12,6 +12,7 @@ from helper.proto_hex import proto_hex
 
 def main():
     def __get_hex_line():
+        rst_btn.config(state=tk.NORMAL)
         qstn_disable()
 
         if counter.count < 6:
@@ -38,6 +39,7 @@ def main():
     def __reset():
         qstn_enable()
         toss_btn.config(state=tk.NORMAL)
+        rst_btn.config(state=tk.DISABLED)
         qstn_reset()
         counter.reset()
         proto_hex.reset()
@@ -48,5 +50,6 @@ def main():
 
     rst_btn = ttk.Button(root, text='Reset', command=__reset)
     rst_btn.pack(in_=btns, side=tk.RIGHT, ipadx=10, ipady=10)
+    rst_btn.config(state=tk.DISABLED)
 
     root.mainloop()

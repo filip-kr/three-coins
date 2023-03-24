@@ -23,7 +23,7 @@ def __show_instructions():
 
     instr_text = '1. Think of a problem\n' \
                  '2. Turn it into an open-ended question\n' \
-                 '3. Write the question into the program\n' \
+                 '3. Write the question into the program (optional, but helps with step 4)\n' \
                  '4. Focus on it\n' \
                  '5. Toss coins until a hexagram is formed\n' \
                  '6. Consult external resources of choice for detailed line meanings\n\n' \
