@@ -26,7 +26,7 @@ def __show_instructions():
                  '3. Write the question into the program\n' \
                  '4. Focus on it\n' \
                  '5. Toss coins until a hexagram is formed\n' \
-                 '6. Consult external resources of choice for detailed I Ching readings\n\n' \
+                 '6. Consult external resources of choice for detailed line meanings\n\n' \
                  'Left hexagram explains your current predicament in regards to your question,\n' \
                  'with its changing lines explaining what can be done about it.\n\n' \
                  'Right hexagram foretells the possible future if Oracle\'s advice is heeded.'

@@ -93,20 +93,20 @@ def draw_true_info(true_hex: tuple):
     number = '#' + true_hex[0]
     name = true_hex[1]
 
-    __left_info_canvas.create_text((140, 50), text=number)
-    __left_info_canvas.create_text((140, 100), text=name)
+    __left_info_canvas.create_text((140, 50), text=number, font=('TkDefaultFont', 15))
+    __left_info_canvas.create_text((140, 100), text=name, font=('TkDefaultFont', 20))
 
 
 def draw_reverse_info(reverse_hex: tuple):
     number = '#' + reverse_hex[0]
     name = reverse_hex[1]
 
-    __right_info_canvas.create_text((210, 50), text=number)
-    __right_info_canvas.create_text((210, 100), text=name)
+    __right_info_canvas.create_text((210, 50), text=number, font=('TkDefaultFont', 15))
+    __right_info_canvas.create_text((210, 100), text=name, font=('TkDefaultFont', 20))
 
 
 def draw_no_change():
-    __right_info_canvas.create_text((210, 50), text='No changing lines')
+    __right_info_canvas.create_text((210, 50), text='No changing lines', font=('TkDefaultFont', 15))
 
 
 def canvas_reset():
