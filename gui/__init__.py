@@ -1,11 +1,9 @@
-from gui.asset.app_icon import \
-    app_icon_str, app_icon_ico
-
+from gui.asset.icon import icon_str
 import tkinter as tk
 from tkinter import ttk
 
 root = tk.Tk()
-app_icon = tk.PhotoImage(data=app_icon_str)
+icon = tk.PhotoImage(data=icon_str)
 
 
 def __show_instructions():
@@ -60,7 +58,7 @@ def __show_about():
     about_footer = 'Copyright (c) 2023 Filip Krnjaković\n' \
                    'github.com/filip-kr/three-coins'
 
-    about_icon_label = ttk.Label(about_win, image=app_icon)
+    about_icon_label = ttk.Label(about_win, image=icon)
     about_icon_label.pack(in_=about_frame, pady=15)
 
     about_title_label = ttk.Label(about_win, text=about_title, font='BOLD')
@@ -77,28 +75,21 @@ def __show_about():
 
 
 def __prepare_root():
-    try:
-        from ctypes import windll
-    except ImportError:
-        root.iconphoto(True, app_icon)
-    else:
-        windll.shcore.SetProcessDpiAwareness(1)
-        root.iconbitmap(app_icon_ico)
-    finally:
-        root.title('Three Coins')
-        win_width = 800
-        win_height = 800
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
-        center_x = int(screen_width / 2 - win_width / 2)
-        center_y = int(screen_height / 2 - win_height / 2)
-        root.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
-        root.resizable(False, False)
+    root.iconphoto(True, icon)
+    root.title('Three Coins')
+    win_width = 800
+    win_height = 800
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    center_x = int(screen_width / 2 - win_width / 2)
+    center_y = int(screen_height / 2 - win_height / 2)
+    root.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
+    root.resizable(False, False)
 
-        root_menu = tk.Menu(root)
-        root.config(menu=root_menu)
-        root_menu.add_command(label='Instructions', command=__show_instructions)
-        root_menu.add_command(label='About', command=__show_about)
+    root_menu = tk.Menu(root)
+    root.config(menu=root_menu)
+    root_menu.add_command(label='Instructions', command=__show_instructions)
+    root_menu.add_command(label='About', command=__show_about)
 
 
 __prepare_root()
