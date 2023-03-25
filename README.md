@@ -9,6 +9,8 @@
 ### three-coins
 
 A simple Linux desktop application for I Ching divination using the 3-coin method.
+<br>
+Precompiled executable ```three_coins_vX.X.X``` can be found in Releases.
 
 ### I Ching divination
 
