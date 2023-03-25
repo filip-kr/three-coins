@@ -9,6 +9,7 @@ icon = tk.PhotoImage(data=icon_str)
 def __show_instructions():
     instr_win = tk.Toplevel()
     instr_win.title('Instructions')
+
     win_width = 600
     win_height = 250
     screen_width = root.winfo_screenwidth()
@@ -39,6 +40,7 @@ def __show_instructions():
 def __show_about():
     about_win = tk.Toplevel()
     about_win.title('About')
+
     win_width = 300
     win_height = 300
     screen_width = root.winfo_screenwidth()
@@ -77,6 +79,7 @@ def __show_about():
 def __prepare_root():
     root.iconphoto(True, icon)
     root.title('Three Coins')
+
     win_width = 800
     win_height = 800
     screen_width = root.winfo_screenwidth()
