@@ -3,4 +3,9 @@ __pycache__/
 three_coins/__pycache__/
 
 # IDE
-.idea
+.idea/
+
+# PyInstaller
+build/
+dist/
+*.spec
