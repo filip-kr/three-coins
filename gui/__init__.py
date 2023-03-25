@@ -23,11 +23,11 @@ def __show_instructions():
 
     instr_text = '1. Think of a problem\n' \
                  '2. Turn it into an open-ended question\n' \
-                 '3. Write the question into the program (optional, but helps with step 4)\n' \
+                 '3. Write the question into the application (optional, but helps with step 4)\n' \
                  '4. Focus on it\n' \
                  '5. Toss coins until a hexagram is formed\n' \
                  '6. Consult external resources of choice for detailed line meanings\n\n' \
-                 'Left hexagram explains your current predicament in regards to your question,\n' \
+                 'Left hexagram explains your current position in regards to your question,\n' \
                  'with its changing lines explaining what can be done about it.\n\n' \
                  'Right hexagram foretells the possible future if Oracle\'s advice is heeded.'
 
@@ -53,7 +53,7 @@ def __show_about():
 
     about_title = 'Three Coins'
     about_ver = 'v1.0.0'
-    about_body = 'I Ching readings using the 3-coin method'
+    about_body = 'I Ching divination using the 3-coin method'
     about_footer = 'Copyright (c) 2023 Filip Krnjaković\n' \
                    'github.com/filip-kr/three-coins'
 
