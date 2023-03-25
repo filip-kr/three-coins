@@ -1,11 +1,15 @@
 from db import conn
 from gui import tk, ttk, root
-from gui.input import btns, \
-    qstn_reset, qstn_disable, qstn_enable
+
+from gui.input import \
+    btns, qstn_reset, \
+    qstn_disable, qstn_enable
+
 from gui.output import \
     draw_line_left, draw_reverse_hex, \
     draw_true_info, draw_reverse_info, \
     draw_no_change, canvas_reset
+
 from helper.counter import counter
 from helper.proto_hex import proto_hex
 
