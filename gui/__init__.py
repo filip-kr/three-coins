@@ -1,8 +1,9 @@
+from gui.asset.app_icon import app_icon_str
 import tkinter as tk
 from tkinter import ttk
 
 root = tk.Tk()
-__about_icon = tk.PhotoImage(file='gui/asset/icon.gif')
+app_icon = tk.PhotoImage(data=app_icon_str)
 
 
 def __show_instructions():
@@ -57,7 +58,7 @@ def __show_about():
     about_footer = 'Copyright (c) 2023 Filip Krnjaković\n' \
                    'github.com/filip-kr/three-coins'
 
-    about_icon_label = ttk.Label(about_win, image=__about_icon)
+    about_icon_label = ttk.Label(about_win, image=app_icon)
     about_icon_label.pack(in_=about_frame, pady=15)
 
     about_title_label = ttk.Label(about_win, text=about_title, font='BOLD')
@@ -77,7 +78,7 @@ def __prepare_root():
     try:
         from ctypes import windll
     except ImportError:
-        root.iconbitmap('@gui/asset/icon.xbm')
+        root.iconphoto(True, app_icon)
     else:
         windll.shcore.SetProcessDpiAwareness(1)
         root.iconbitmap('gui/asset/icon.ico')
