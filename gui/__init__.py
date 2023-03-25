@@ -1,4 +1,6 @@
-from gui.asset.app_icon import app_icon_str
+from gui.asset.app_icon import \
+    app_icon_str, app_icon_ico
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -81,7 +83,7 @@ def __prepare_root():
         root.iconphoto(True, app_icon)
     else:
         windll.shcore.SetProcessDpiAwareness(1)
-        root.iconbitmap('gui/asset/icon.ico')
+        root.iconbitmap(app_icon_ico)
     finally:
         root.title('Three Coins')
         win_width = 800
