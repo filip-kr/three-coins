@@ -1,8 +1,9 @@
-<h1 align="center">
-    <br>
-    <img src="https://i.imgur.com/U9vwPVo.png" alt="icon" width="100"/>
-    <p align="center">Three Coins</p>
-</h1>
+<div align="center">
+    <h1></h1>
+    <img src="https://i.imgur.com/U9vwPVo.png" alt="icon" width="150"/>
+    <h1 align="center">Three Coins</h1>
+</div>
+<br>
 
 ## About
 
@@ -39,6 +40,8 @@ Precompiled executables ```three_coins_vX.X.X``` can be found in Releases.
 > to determine its number and name.
 
 - From [Wikibooks](https://en.wikibooks.org/wiki/I_Ching/The_3-coin_Method)
+
+<br>
 
 ## Gallery
 
