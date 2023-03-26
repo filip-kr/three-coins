@@ -1,5 +1,4 @@
 <div align="center">
-    <h1></h1>
     <img src="https://i.imgur.com/U9vwPVo.png" alt="icon" width="150"/>
     <h1 align="center">Three Coins</h1>
 </div>
