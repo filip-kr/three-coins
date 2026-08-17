@@ -8,6 +8,12 @@ _db_file = os.path.join(_db_dir, 'hexagrams.db')
 _connection = apsw.Connection(_db_file, flags=apsw.SQLITE_OPEN_READONLY)
 
 
+def all_names() -> list[str]:
+    query = 'SELECT name FROM hexagrams'
+    cursor = _connection.cursor()
+    return [row[0] for row in cursor.execute(query).fetchall()]
+
+
 def get_by_binary(binary: list) -> tuple:
     query = 'SELECT * FROM hexagrams WHERE binary = ? LIMIT 1'
     binding = [''.join(binary)]

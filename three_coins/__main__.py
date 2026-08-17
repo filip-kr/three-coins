@@ -1,6 +1,3 @@
-import tkinter as tk
-from tkinter import ttk
-
 import gui
 import gui.input as gui_input
 import gui.output as gui_output
@@ -9,8 +6,42 @@ from helper.session import session
 
 
 def main():
+    def _apply_session_state():
+        if session.count == 0:
+            gui_input.qstn_enable()
+            gui_input.toss_enable()
+            gui_input.reset_disable()
+        elif session.is_complete:
+            gui_input.qstn_disable()
+            gui_input.toss_disable()
+            gui_input.reset_enable()
+        else:
+            gui_input.qstn_disable()
+            gui_input.toss_enable()
+            gui_input.reset_enable()
+
+    def _redraw_session():
+        for i, line in enumerate(session.lines):
+            gui_output.draw_line_left(i, line)
+
+        if not session.is_complete:
+            return
+
+        true_binary = list(reversed(session.binary))
+        true_hex = conn.get_by_binary(true_binary)
+        gui_output.draw_true_info(true_hex)
+
+        if not session.has_changing_lines:
+            gui_output.draw_no_change()
+            return
+
+        reverse_binary = list(reversed(session.reverse_binary))
+        reverse_hex = conn.get_by_binary(reverse_binary)
+        gui_output.draw_reverse_hex(reverse_binary)
+        gui_output.draw_reverse_info(reverse_hex)
+
     def _on_toss():
-        rst_btn.config(state=tk.NORMAL)
+        gui_input.reset_enable()
         gui_input.qstn_disable()
 
         if session.is_complete:
@@ -23,7 +54,7 @@ def main():
         if not session.is_complete:
             return
 
-        toss_btn.config(state=tk.DISABLED)
+        gui_input.toss_disable()
 
         true_binary = list(reversed(session.binary))
         true_hex = conn.get_by_binary(true_binary)
@@ -40,21 +71,32 @@ def main():
 
     def _on_reset():
         gui_input.qstn_enable()
-        toss_btn.config(state=tk.NORMAL)
-        rst_btn.config(state=tk.DISABLED)
+        gui_input.toss_enable()
+        gui_input.reset_disable()
         gui_input.qstn_reset()
         session.reset()
         gui_output.canvas_reset()
 
+    def _on_resolution_changed():
+        question_text = gui_input.get_question()
+
+        gui_input.destroy()
+        gui_output.destroy()
+        gui.reset_min_height()
+
+        gui_input.build(_on_toss, _on_reset)
+        gui_output.build()
+
+        gui_input.set_question(question_text)
+        _apply_session_state()
+        _redraw_session()
+
+        gui.finalize()
+
     gui.build()
-    gui_input.build()
+    gui.set_resolution_change_hook(_on_resolution_changed)
+    gui_input.build(_on_toss, _on_reset)
     gui_output.build()
 
-    toss_btn = ttk.Button(gui.root, text='Toss coins', command=_on_toss)
-    toss_btn.pack(in_=gui_input.btns, side=tk.LEFT, ipadx=10, ipady=10)
-
-    rst_btn = ttk.Button(gui.root, text='Reset', command=_on_reset)
-    rst_btn.pack(in_=gui_input.btns, side=tk.RIGHT, ipadx=10, ipady=10)
-    rst_btn.config(state=tk.DISABLED)
-
+    gui.finalize()
     gui.root.mainloop()
