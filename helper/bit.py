@@ -1,6 +1,14 @@
-def get(coin_toss_result: int) -> int:
-    return 0 if coin_toss_result == 6 or coin_toss_result == 8 else 1
+from helper.line_type import LineType
+
+_YIN_LINES = (LineType.OLD_YIN, LineType.YOUNG_YIN)
+_RESULTS_IN_YANG = (LineType.OLD_YIN, LineType.YOUNG_YANG)
 
 
-def get_reverse(coin_toss_result: int) -> int:
-    return 1 if coin_toss_result == 6 or coin_toss_result == 7 else 0
+def from_toss(line: LineType) -> int:
+    """Bit for the line as originally tossed (0 = yin, 1 = yang)."""
+    return 0 if line in _YIN_LINES else 1
+
+
+def reverse_from_toss(line: LineType) -> int:
+    """Bit for the line after changing lines transform (0 = yin, 1 = yang)."""
+    return 1 if line in _RESULTS_IN_YANG else 0

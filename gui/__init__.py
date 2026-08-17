@@ -1,22 +1,24 @@
-from gui.asset.icon import icon_str
 import tkinter as tk
 from tkinter import ttk
+
+from gui.asset.icon import icon_str
 
 root = tk.Tk()
 icon = tk.PhotoImage(data=icon_str)
 
 
-def __show_instructions():
-    instr_win = tk.Toplevel()
-    instr_win.title('Instructions')
-
-    win_width = 600
-    win_height = 250
+def _center_window(win: tk.Wm, width: int, height: int) -> None:
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    center_x = int(screen_width / 2 - win_width / 2)
-    center_y = int(screen_height / 2 - win_height / 2)
-    instr_win.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
+    x = int(screen_width / 2 - width / 2)
+    y = int(screen_height / 2 - height / 2)
+    win.geometry(f'{width}x{height}+{x}+{y}')
+
+
+def _show_instructions():
+    instr_win = tk.Toplevel()
+    instr_win.title('Instructions')
+    _center_window(instr_win, 600, 250)
     instr_win.resizable(False, False)
     instr_win.grab_set()
 
@@ -37,17 +39,10 @@ def __show_instructions():
     instr_label.pack(in_=instr_frame, pady=20)
 
 
-def __show_about():
+def _show_about():
     about_win = tk.Toplevel()
     about_win.title('About')
-
-    win_width = 300
-    win_height = 300
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    center_x = int(screen_width / 2 - win_width / 2)
-    center_y = int(screen_height / 2 - win_height / 2)
-    about_win.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
+    _center_window(about_win, 300, 300)
     about_win.resizable(False, False)
     about_win.grab_set()
 
@@ -76,23 +71,13 @@ def __show_about():
     about_footer_label.pack(in_=about_frame, pady=10)
 
 
-def __prepare_root():
+def build():
     root.iconphoto(True, icon)
     root.title('Three Coins')
-
-    win_width = 800
-    win_height = 800
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    center_x = int(screen_width / 2 - win_width / 2)
-    center_y = int(screen_height / 2 - win_height / 2)
-    root.geometry(f'{win_width}x{win_height}+{center_x}+{center_y}')
+    _center_window(root, 800, 800)
     root.resizable(False, False)
 
     root_menu = tk.Menu(root)
     root.config(menu=root_menu)
-    root_menu.add_command(label='Instructions', command=__show_instructions)
-    root_menu.add_command(label='About', command=__show_about)
-
-
-__prepare_root()
+    root_menu.add_command(label='Instructions', command=_show_instructions)
+    root_menu.add_command(label='About', command=_show_about)

@@ -1,17 +1,20 @@
-import apsw
 import os
 import sys
 
-__db_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
-__db_file = os.path.join(__db_dir, 'hexagrams.db')
+import apsw
+
+_db_dir = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+_db_file = os.path.join(_db_dir, 'hexagrams.db')
+_connection = apsw.Connection(_db_file, flags=apsw.SQLITE_OPEN_READONLY)
 
 
 def get_by_binary(binary: list) -> tuple:
     query = 'SELECT * FROM hexagrams WHERE binary = ? LIMIT 1'
     binding = [''.join(binary)]
-    conn = apsw.Connection(__db_file, flags=apsw.SQLITE_OPEN_READONLY)
-    cursor = conn.cursor()
-    hexagram = cursor.execute(query, binding).fetchall()
-    conn.close()
+    cursor = _connection.cursor()
+    row = cursor.execute(query, binding).fetchone()
 
-    return hexagram[0]
+    if row is None:
+        raise ValueError(f'No hexagram found for binary {binding[0]!r}')
+
+    return row

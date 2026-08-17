@@ -1,59 +1,60 @@
+import tkinter as tk
+from tkinter import ttk
+
+import gui
+import gui.input as gui_input
+import gui.output as gui_output
 from db import conn
-from gui import tk, ttk, root
-
-from gui.input import \
-    btns, qstn_reset, \
-    qstn_disable, qstn_enable
-
-from gui.output import \
-    draw_line_left, draw_reverse_hex, \
-    draw_true_info, draw_reverse_info, \
-    draw_no_change, canvas_reset
-
-from helper.counter import counter
-from helper.proto_hex import proto_hex
+from helper.session import session
 
 
 def main():
-    def __get_hex_line():
+    def _on_toss():
         rst_btn.config(state=tk.NORMAL)
-        qstn_disable()
+        gui_input.qstn_disable()
 
-        if counter.count < 6:
-            proto_hex.add_line(counter.count)
-            draw_line_left(counter.count, proto_hex.lines[counter.count])
-            counter.add(1)
+        if session.is_complete:
+            return
 
-            if counter.count == 6:
-                toss_btn.config(state=tk.DISABLED)
+        line_index = session.count
+        line = session.toss_line()
+        gui_output.draw_line_left(line_index, line)
 
-                proto_hex.binary.reverse()
-                true_hex = conn.get_by_binary(proto_hex.binary)
-                draw_true_info(true_hex)
+        if not session.is_complete:
+            return
 
-                if 6 not in proto_hex.lines and 9 not in proto_hex.lines:
-                    draw_no_change()
-                    return
+        toss_btn.config(state=tk.DISABLED)
 
-                proto_hex.reverse_binary.reverse()
-                reverse_hex = conn.get_by_binary(proto_hex.reverse_binary)
-                draw_reverse_hex(proto_hex.reverse_binary)
-                draw_reverse_info(reverse_hex)
+        true_binary = list(reversed(session.binary))
+        true_hex = conn.get_by_binary(true_binary)
+        gui_output.draw_true_info(true_hex)
 
-    def __reset():
-        qstn_enable()
+        if not session.has_changing_lines:
+            gui_output.draw_no_change()
+            return
+
+        reverse_binary = list(reversed(session.reverse_binary))
+        reverse_hex = conn.get_by_binary(reverse_binary)
+        gui_output.draw_reverse_hex(reverse_binary)
+        gui_output.draw_reverse_info(reverse_hex)
+
+    def _on_reset():
+        gui_input.qstn_enable()
         toss_btn.config(state=tk.NORMAL)
         rst_btn.config(state=tk.DISABLED)
-        qstn_reset()
-        counter.reset()
-        proto_hex.reset()
-        canvas_reset()
+        gui_input.qstn_reset()
+        session.reset()
+        gui_output.canvas_reset()
 
-    toss_btn = ttk.Button(root, text='Toss coins', command=__get_hex_line)
-    toss_btn.pack(in_=btns, side=tk.LEFT, ipadx=10, ipady=10)
+    gui.build()
+    gui_input.build()
+    gui_output.build()
 
-    rst_btn = ttk.Button(root, text='Reset', command=__reset)
-    rst_btn.pack(in_=btns, side=tk.RIGHT, ipadx=10, ipady=10)
+    toss_btn = ttk.Button(gui.root, text='Toss coins', command=_on_toss)
+    toss_btn.pack(in_=gui_input.btns, side=tk.LEFT, ipadx=10, ipady=10)
+
+    rst_btn = ttk.Button(gui.root, text='Reset', command=_on_reset)
+    rst_btn.pack(in_=gui_input.btns, side=tk.RIGHT, ipadx=10, ipady=10)
     rst_btn.config(state=tk.DISABLED)
 
-    root.mainloop()
+    gui.root.mainloop()

@@ -1,116 +1,95 @@
-from gui import root, tk, ttk
+import tkinter as tk
+from tkinter import ttk
 
-__overframe = ttk.Frame(root, borderwidth=5)
-__overframe.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=20, pady=20)
+from gui import root
+from helper.line_type import LineType
 
-__hex_frame = ttk.Frame(root, borderwidth=5, relief='sunken')
-__hex_frame.pack(in_=__overframe, side=tk.TOP)
-
-__info_frame = ttk.Frame(root, borderwidth=5, relief='raised')
-__info_frame.pack(in_=__overframe, side=tk.BOTTOM, fill=tk.BOTH)
-
-__left_hex_canvas = tk.Canvas(root, height=350)
-__left_hex_canvas.pack(in_=__hex_frame, side=tk.LEFT)
-
-__right_hex_canvas = tk.Canvas(root, height=350)
-__right_hex_canvas.pack(in_=__hex_frame, side=tk.RIGHT)
-
-__left_info_canvas = tk.Canvas(root)
-__left_info_canvas.pack(in_=__info_frame, side=tk.LEFT)
-
-__right_info_canvas = tk.Canvas(root)
-__right_info_canvas.pack(in_=__info_frame, side=tk.RIGHT)
+_left_hex_canvas: tk.Canvas | None = None
+_right_hex_canvas: tk.Canvas | None = None
+_left_info_canvas: tk.Canvas | None = None
+_right_info_canvas: tk.Canvas | None = None
 
 
-def __get_left_coordinates(count: int) -> dict:
-    x0 = 50
-    y0 = 300
-    x1 = 250
-    y1 = 300
+def build():
+    global _left_hex_canvas, _right_hex_canvas, _left_info_canvas, _right_info_canvas
 
-    match count:
-        case 1:
-            y0 -= 50
-            y1 -= 50
-        case 2:
-            y0 -= 100
-            y1 -= 100
-        case 3:
-            y0 -= 150
-            y1 -= 150
-        case 4:
-            y0 -= 200
-            y1 -= 200
-        case 5:
-            y0 -= 250
-            y1 -= 250
+    overframe = ttk.Frame(root, borderwidth=5)
+    overframe.pack(side=tk.BOTTOM, fill=tk.BOTH, padx=20, pady=20)
 
-    return {
-        'x0': x0,
-        'x1': x1,
-        'y0': y0,
-        'y1': y1
-    }
+    hex_frame = ttk.Frame(root, borderwidth=5, relief='sunken')
+    hex_frame.pack(in_=overframe, side=tk.TOP)
+
+    info_frame = ttk.Frame(root, borderwidth=5, relief='raised')
+    info_frame.pack(in_=overframe, side=tk.BOTTOM, fill=tk.BOTH)
+
+    _left_hex_canvas = tk.Canvas(root, height=350)
+    _left_hex_canvas.pack(in_=hex_frame, side=tk.LEFT)
+
+    _right_hex_canvas = tk.Canvas(root, height=350)
+    _right_hex_canvas.pack(in_=hex_frame, side=tk.RIGHT)
+
+    _left_info_canvas = tk.Canvas(root)
+    _left_info_canvas.pack(in_=info_frame, side=tk.LEFT)
+
+    _right_info_canvas = tk.Canvas(root)
+    _right_info_canvas.pack(in_=info_frame, side=tk.RIGHT)
 
 
-def draw_line_left(count: int, coin_toss_result: int):
-    coordinates = __get_left_coordinates(count)
-    x0 = coordinates.get('x0')
-    x1 = coordinates.get('x1')
-    y0 = coordinates.get('y0')
-    y1 = coordinates.get('y1')
-    width = 20
+def _left_line_coordinates(count: int) -> tuple[int, int, int, int]:
+    x0, x1 = 50, 250
+    y0 = y1 = 300 - count * 50
+    return x0, y0, x1, y1
 
-    match coin_toss_result:
-        case 6:
-            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40), fill='red')
-        case 7:
-            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
-        case 8:
-            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
-        case 9:
-            __left_hex_canvas.create_line((x0, y0), (x1, y1), width=width, fill='red')
+
+def draw_line_left(count: int, line: LineType):
+    x0, y0, x1, y1 = _left_line_coordinates(count)
+    is_broken = line in (LineType.OLD_YIN, LineType.YOUNG_YIN)
+    is_changing = line in (LineType.OLD_YIN, LineType.OLD_YANG)
+
+    kwargs = {'width': 20}
+    if is_broken:
+        kwargs['dash'] = (80, 40)
+    if is_changing:
+        kwargs['fill'] = 'red'
+
+    _left_hex_canvas.create_line((x0, y0), (x1, y1), **kwargs)
 
 
 def draw_reverse_hex(reverse_binary: list):
-    x0 = 110
-    y0 = 50
-    x1 = 310
-    y1 = 50
-    width = 20
+    x0, y0, x1, y1 = 110, 50, 310, 50
 
-    for bit in reverse_binary:
-        if bit == '1':
-            __right_hex_canvas.create_line((x0, y0), (x1, y1), width=width)
-        else:
-            __right_hex_canvas.create_line((x0, y0), (x1, y1), width=width, dash=(80, 40))
+    for bit_char in reverse_binary:
+        kwargs = {'width': 20}
+        if bit_char != '1':
+            kwargs['dash'] = (80, 40)
 
+        _right_hex_canvas.create_line((x0, y0), (x1, y1), **kwargs)
         y0 += 50
         y1 += 50
 
 
-def draw_true_info(true_hex: tuple):
-    number = '#' + true_hex[0]
-    name = true_hex[1]
+def _draw_hex_info(canvas: tk.Canvas, hex_data: tuple, x: int):
+    number = '#' + hex_data[0]
+    name = hex_data[1]
 
-    __left_info_canvas.create_text((140, 50), text=number, font=('TkDefaultFont', 15))
-    __left_info_canvas.create_text((140, 100), text=name, font=('TkDefaultFont', 20))
+    canvas.create_text((x, 50), text=number, font=('TkDefaultFont', 15))
+    canvas.create_text((x, 100), text=name, font=('TkDefaultFont', 20))
+
+
+def draw_true_info(true_hex: tuple):
+    _draw_hex_info(_left_info_canvas, true_hex, 140)
 
 
 def draw_reverse_info(reverse_hex: tuple):
-    number = '#' + reverse_hex[0]
-    name = reverse_hex[1]
-
-    __right_info_canvas.create_text((200, 50), text=number, font=('TkDefaultFont', 15))
-    __right_info_canvas.create_text((200, 100), text=name, font=('TkDefaultFont', 20))
+    _draw_hex_info(_right_info_canvas, reverse_hex, 200)
 
 
 def draw_no_change():
-    __right_info_canvas.create_text((210, 50), text='No changing lines', font=('TkDefaultFont', 15))
+    _right_info_canvas.create_text((210, 50), text='No changing lines', font=('TkDefaultFont', 15))
 
 
 def canvas_reset():
-    __left_hex_canvas.delete('all')
-    __right_hex_canvas.delete('all')
-    __left_info_canvas.delete('all')
-    __right_info_canvas.delete('all')
+    _left_hex_canvas.delete('all')
+    _right_hex_canvas.delete('all')
+    _left_info_canvas.delete('all')
+    _right_info_canvas.delete('all')
