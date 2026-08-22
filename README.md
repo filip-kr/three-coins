@@ -1,6 +1,5 @@
 <div align="center">
-    <img src="gui/asset/icon.gif" alt="icon" width="150"/>
-    <h1 align="center">Three Coins</h1>
+    <img src="docs/social-preview.png" alt="Three Coins — I Ching divination using the 3-coin method" width="100%"/>
 </div>
 <br>
 
