@@ -5,7 +5,7 @@
 ### Added
 
 - **Tabbed hexagram display.** The two hexagrams (current and, when there are stressed lines, future) are now shown as switchable tabs labeled by hexagram number, instead of two fixed side-by-side canvases.
-- **Adjustable window resolution.** Settings > Resolution offers five presets (Small 800x800 up to XX-Large 1600x1600); the whole UI - fonts, spacing, hexagram lines - scales to match, and the choice is remembered between runs.
+- **Adjustable window resolution.** Settings > Resolution offers five presets (Small 800px wide up to XX-Large 1600px wide); the whole UI - fonts, spacing, hexagram lines - scales to match, and the choice is remembered between runs.
 - **Selectable color themes.** Settings > Theme offers five palettes (Parchment, Midnight, Jade, Slate, Sumi-e), also remembered between runs.
 - **Persistent local settings**, stored as JSON at `~/.config/three-coins/settings.json` (or under `$XDG_CONFIG_HOME/three-coins/` if that's set).
 - **Multi-monitor-aware window centering.** Windows now center against the primary monitor's actual bounds (via `xrandr`) rather than the combined virtual desktop, which could previously place a window straddling monitors or in the gap between two displays with different offsets.

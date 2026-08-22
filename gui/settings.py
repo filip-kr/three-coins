@@ -2,12 +2,16 @@ import json
 import os
 from pathlib import Path
 
+# The label only names width, not "WxH": the window's height is content-driven
+# (gui.finalize() grows it to fit the fixed-size tab layout, see
+# gui.register_min_height) and is reliably taller than the width, so a "WxW"
+# label would promise a square window this app never actually shows.
 RESOLUTIONS = [
-    ('Small (800x800)', 800, 800),
-    ('Medium (1000x1000)', 1000, 1000),
-    ('Large (1200x1200)', 1200, 1200),
-    ('X-Large (1400x1400)', 1400, 1400),
-    ('XX-Large (1600x1600)', 1600, 1600),
+    ('Small (800px wide)', 800, 800),
+    ('Medium (1000px wide)', 1000, 1000),
+    ('Large (1200px wide)', 1200, 1200),
+    ('X-Large (1400px wide)', 1400, 1400),
+    ('XX-Large (1600px wide)', 1600, 1600),
 ]
 
 DEFAULT_RESOLUTION = RESOLUTIONS[1]
