@@ -17,6 +17,7 @@ _MONITOR_RE = re.compile(r'(\d+)x(\d+)\+(\d+)\+(\d+)')
 scale: float = 1.0
 _min_height = 0
 _resolution_change_hook = None
+_current_resolution_label: str | None = None
 
 
 def scaled(value: float) -> int:
@@ -112,11 +113,19 @@ def _center_to_content(win: tk.Toplevel, min_width: int, min_height: int) -> Non
 
 
 def _on_resolution_selected(label: str, width: int, height: int) -> None:
-    global scale
+    global scale, _current_resolution_label
+
+    if label == _current_resolution_label:
+        # Clicking a checkbutton menu item toggles it before the command runs,
+        # so re-clicking the already-active resolution would otherwise show it
+        # as unchecked - restore it and skip the rebuild, since nothing changed.
+        _resolution_vars[label].set(True)
+        return
 
     for res_label, var in _resolution_vars.items():
         var.set(res_label == label)
 
+    _current_resolution_label = label
     scale = width / _BASE_SIZE
     settings.save_resolution(width, height)
 
@@ -130,6 +139,8 @@ def _show_instructions():
     instr_win = tk.Toplevel(bg=theme.BG)
     instr_win.title('Instructions')
     instr_win.resizable(False, False)
+    instr_win.transient(root)
+    instr_win.attributes('-topmost', True)
     instr_win.grab_set()
 
     instr_frame = ttk.Frame(instr_win)
@@ -155,6 +166,8 @@ def _show_about():
     about_win = tk.Toplevel(bg=theme.BG)
     about_win.title('About')
     about_win.resizable(False, False)
+    about_win.transient(root)
+    about_win.attributes('-topmost', True)
     about_win.grab_set()
 
     about_frame = ttk.Frame(about_win)
@@ -187,7 +200,7 @@ def _show_about():
 
 
 def build():
-    global scale
+    global scale, _current_resolution_label
 
     # Hidden until finalize() reveals it, so nothing (theme colors landing,
     # widgets being packed one at a time) is visible mid-construction.
@@ -200,6 +213,7 @@ def build():
     root.resizable(False, False)
 
     current_label, width, height = settings.load_resolution()
+    _current_resolution_label = current_label
     scale = width / _BASE_SIZE
 
     root_menu = tk.Menu(root)
