@@ -12,7 +12,7 @@ A simple Linux desktop application for I Ching divination using the 3-coin metho
 <br>
 Precompiled executables ```three_coins_vX.X.X``` can be found in Releases.
 
-**Disclaimer:** Starting with v2.0, AI was used to assist in developing this application.
+**Disclaimer:** Starting with v2.0.0, AI was used to assist in developing this application.
 
 ### I Ching divination
 
