@@ -189,10 +189,10 @@ def _show_instructions():
                  '3. Write the question into the application (optional, but helps with step 4)\n' \
                  '4. Focus on it\n' \
                  '5. Toss coins until a hexagram is formed\n' \
-                 '6. Consult external resources of choice for detailed line meanings\n\n' \
-                 'Left hexagram explains your current position in regards to your question,\n' \
-                 'with its changing lines explaining what can be done about it.\n\n' \
-                 'Right hexagram foretells the possible future if Oracle\'s advice is heeded.'
+                 '6. Consult external resources of your choice for detailed line meanings\n\n' \
+                 'The left hexagram explains your current position regarding your question,\n' \
+                 'with its stressed lines explaining what can be done about it.\n\n' \
+                 'The right hexagram foretells the possible future if the oracle\'s advice is heeded.'
 
     instr_label = ttk.Label(instr_win, text=instr_text, font=('TkDefaultFont', scaled(10)))
     instr_label.pack(in_=instr_frame, pady=scaled(20))
@@ -212,9 +212,9 @@ def _show_about():
     about_frame.pack(padx=scaled(15))
 
     about_title = 'Three Coins'
-    about_ver = 'v1.0.0'
+    about_ver = 'v2.0.0'
     about_body = 'I Ching divination using the 3-coin method'
-    about_footer = 'Copyright (c) 2023 Filip Krnjaković\n' \
+    about_footer = 'Copyright (c) 2023-2026 Filip Krnjaković\n' \
                    'github.com/filip-kr/three-coins'
 
     about_icon_label = ttk.Label(about_win, image=icon)

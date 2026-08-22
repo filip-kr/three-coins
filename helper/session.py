@@ -14,8 +14,8 @@ class HexagramSession:
         return self.count == 6
 
     @property
-    def has_changing_lines(self) -> bool:
-        return LineType.OLD_YIN in self.lines or LineType.OLD_YANG in self.lines
+    def has_stressed_lines(self) -> bool:
+        return LineType.STRESSED_MAGNETIC in self.lines or LineType.STRESSED_DYNAMIC in self.lines
 
     def toss_line(self) -> LineType:
         line = coin.toss_three()

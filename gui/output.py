@@ -158,11 +158,11 @@ def _left_line_coordinates(count: int) -> tuple[int, int, int, int]:
 
 def _draw_hex_line(canvas: tk.Canvas, count: int, line: LineType) -> None:
     x0, y0, x1, y1 = _left_line_coordinates(count)
-    is_broken = line in (LineType.OLD_YIN, LineType.YOUNG_YIN)
-    is_changing = line in (LineType.OLD_YIN, LineType.OLD_YANG)
+    is_broken = line in (LineType.STRESSED_MAGNETIC, LineType.MAGNETIC)
+    is_stressed = line in (LineType.STRESSED_MAGNETIC, LineType.STRESSED_DYNAMIC)
 
     palette = theme.current()
-    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': palette.accent if is_changing else palette.ink}
+    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': palette.accent if is_stressed else palette.ink}
     if is_broken:
         kwargs['dash'] = (_s(80), _s(40))
 

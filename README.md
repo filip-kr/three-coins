@@ -12,33 +12,35 @@ A simple Linux desktop application for I Ching divination using the 3-coin metho
 <br>
 Precompiled executables ```three_coins_vX.X.X``` can be found in Releases.
 
+**Disclaimer:** Starting with v2.0, AI was used to assist in developing this application.
+
 ### I Ching divination
 
-> I Ching divination is a form of cleromancy applied to the I Ching.
-> The text of the I Ching consists of sixty-four hexagrams:
-> six-line figures of yin (broken) or yang (solid) lines,
-> and commentaries on them.
-> There are two main methods of building up the lines of the hexagram,
-> using either 50 yarrow sticks or three coins.
-> Some of the lines may be designated "old" lines,
-> in which case the lines are subsequently changed
-> to create a second hexagram. The text relating to the hexagram(s)
-> and old lines (if any) is studied, and the meanings derived from
-> such study can be interpreted as an oracle.
+The I Ching, or Book of Changes, is a Chinese oracle text first set down around 1143 BCE and still in active use today. At its core are 64 hexagrams: six-line figures built from two kinds of lines, each carrying commentary that's studied in relation to a question the querent brings to it.
 
-- From [Wikipedia](https://en.wikipedia.org/wiki/I_Ching_divination)
+James DeKorne's commentary drops the traditional yin/yang labels in favor of a gender-neutral pair he calls magnetic and dynamic - incoming, receptive, structural energy versus outgoing, expressive, functional energy - specifically to strip out the "negative femininity" bias that crept into the text's older, patriarchal-era translations. A hexagram is cast one line at a time, and some lines come out "stressed": they're read as actively transforming into their opposite, turning the first hexagram into a second one that's studied alongside it. This app follows that same vocabulary throughout.
+
+- Based on James DeKorne's [*The Gnostic Book of Changes*, Chapter 1](https://jamesdekorne.com/GBCh/ch1.htm)
 
 ### The 3-coin method
 
-> To use the coin oracle, you must have three similar coins.
-> Heads are yang and have value 3. Tails are yin and have value 2.
-> Throw the coins six times and add up the numbers each time.
-> For each throw record the number and kind of line it refers to
-> (6 = transforming yin; 7 = stable yang; 8 = stable yin; 9 = transforming yang).
-> Form your hexagram from the bottom up, then use the key to the hexagrams ...
-> to determine its number and name.
+Three coins are thrown together, six times, one throw building one line of the hexagram from the bottom upward. Following Richard Wilhelm's convention, DeKorne treats a coin's engraved (heads) face as its magnetic, yin side, and the plain reverse (tails) as its dynamic, yang side.
 
-- From [Wikibooks](https://en.wikibooks.org/wiki/I_Ching/The_3-coin_Method)
+Each throw is read by how the three coins land: when they split two-to-one, the line takes the gender of the single dissenting coin. When all three agree, the line is stressed - it's read as its shared face's gender, but marked to transform into the opposite gender in the second hexagram. After six throws, the resulting six-line figure is looked up among the 64 hexagrams, and any stressed lines are interpreted specifically against the question asked.
+
+- Based on James DeKorne's [*The Gnostic Book of Changes*, Chapter 5](https://jamesdekorne.com/GBCh/ch5.htm)
+
+### Why use three-coins
+
+Many digital coin-oracle tools quietly get the odds wrong by treating the four possible lines as equally likely - e.g. picking uniformly at random between them. That's not how three physical coins actually behave. three-coins tosses three independent, fair coins under the hood and reads them exactly as described above (rather than summing a numerical value per coin, an older, yarrow-stalk-derived formula DeKorne considers obsolete for the coin oracle), which reproduces the true probabilities: a stressed line lands only 1/8 of the time, a stable line 3/8 of the time.
+
+### Hexagram names and terminology
+
+Hexagram names, and the line terminology used throughout this app (magnetic/dynamic in place of yin/yang, stressed in place of changing/moving), are taken from James DeKorne's [*The Gnostic Book of Changes*](https://jamesdekorne.com/GBCh/GBCh.htm) - recommended reading for anyone who wants to know what the I Ching *really* is.
+
+### Settings
+
+Resolution and theme preferences are saved to `~/.config/three-coins/settings.json` (or under `$XDG_CONFIG_HOME/three-coins/` instead, if that environment variable is set).
 
 <br>
 

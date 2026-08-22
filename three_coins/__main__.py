@@ -31,7 +31,7 @@ def main():
         true_hex = conn.get_by_binary(true_binary)
         gui_output.draw_true_info(true_hex)
 
-        if not session.has_changing_lines:
+        if not session.has_stressed_lines:
             gui_output.draw_no_change(true_hex, session.lines)
             return
 
@@ -60,7 +60,7 @@ def main():
         true_hex = conn.get_by_binary(true_binary)
         gui_output.draw_true_info(true_hex)
 
-        if not session.has_changing_lines:
+        if not session.has_stressed_lines:
             gui_output.draw_no_change(true_hex, session.lines)
             return
 
