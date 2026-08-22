@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://i.imgur.com/U9vwPVo.png" alt="icon" width="150"/>
+    <img src="gui/asset/icon.gif" alt="icon" width="150"/>
     <h1 align="center">Three Coins</h1>
 </div>
 <br>
@@ -47,7 +47,7 @@ Resolution and theme preferences are saved to `~/.config/three-coins/settings.js
 ## Gallery
 
 <p>
-  <img src="https://i.imgur.com/U8712Ju.png" width="300"/>
-  <img src="https://i.imgur.com/5qt6S2i.png" width="300"/>
-  <img src="https://i.imgur.com/BWaXni8.png" width="300"/>
+  <img src="docs/screenshots/01_initial.png" width="300"/>
+  <img src="docs/screenshots/02_reading_true.png" width="300"/>
+  <img src="docs/screenshots/03_reading_reverse.png" width="300"/>
 </p>
