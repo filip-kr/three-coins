@@ -6,13 +6,47 @@
 
 ## About
 
-### three-coins
-
 A simple Linux desktop application for I Ching divination using the 3-coin method.
 <br>
 Precompiled executables ```three_coins_vX.X.X``` can be found in Releases.
 
 **Disclaimer:** Starting with v2.0.0, AI was used to assist in developing this application.
+
+<br>
+
+## Usage
+
+### Running the precompiled executable
+
+Each release's ```three_coins_vX.X.X``` is a self-contained, single-file build for 64-bit Linux (x86_64), produced with PyInstaller. It bundles the Python runtime, the Tcl/Tk GUI toolkit, the `apsw`/SQLite dependency, and the hexagram database - no separate Python, pip, or apt install is needed to run it.
+
+To run it:
+
+```bash
+chmod +x three_coins_vX.X.X
+./three_coins_vX.X.X
+```
+
+**System requirements:**
+
+- 64-bit Linux (x86_64) with a glibc-based distro (e.g. Debian, Ubuntu, Fedora, Arch) - not tested on musl-based distros like Alpine.
+- A running X11 display server, or Xwayland on a Wayland session. The bundled Tk toolkit is X11-only and will fail to start under native Wayland with no XWayland compatibility layer.
+- The system X11 client libraries (`libX11`, `libXft`, `libXext`, `libXrender`, `libXss`) and `fontconfig`/`freetype`. These come preinstalled with essentially any Linux desktop environment; a minimal/headless server install may need an X11 package group added.
+- The `DejaVu Serif` font is used for hexagram names in most themes. It's preinstalled on nearly all Linux distros; if missing, Tk silently falls back to a default font instead of failing.
+
+**Verifying your download:** each release includes a `.sha256` checksum file alongside the executable. Verify with:
+
+```bash
+sha256sum -c three_coins_vX.X.X.sha256
+```
+
+### Settings
+
+Resolution and theme preferences are saved to `~/.config/three-coins/settings.json` (or under `$XDG_CONFIG_HOME/three-coins/` instead, if that environment variable is set).
+
+<br>
+
+## I Ching background
 
 ### I Ching divination
 
@@ -37,10 +71,6 @@ Many digital coin-oracle tools quietly get the odds wrong by treating the four p
 ### Hexagram names and terminology
 
 Hexagram names, and the line terminology used throughout this app (magnetic/dynamic in place of yin/yang, stressed in place of changing/moving), are taken from James DeKorne's [*The Gnostic Book of Changes*](https://jamesdekorne.com/GBCh/GBCh.htm) - recommended reading for anyone who wants to know what the I Ching *really* is.
-
-### Settings
-
-Resolution and theme preferences are saved to `~/.config/three-coins/settings.json` (or under `$XDG_CONFIG_HOME/three-coins/` instead, if that environment variable is set).
 
 <br>
 
