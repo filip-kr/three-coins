@@ -4,6 +4,7 @@ from tkinter import ttk
 from typing import Callable
 
 import gui
+from gui import theme
 
 _input_frame: ttk.Frame | None = None
 _qstn_txtbox: tk.Text | None = None
@@ -30,7 +31,12 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
     qstn_label = ttk.Label(qstn, text='What is your question?', font=txt_font)
     qstn_label.pack(side=tk.TOP, ipady=s(10))
 
-    _qstn_txtbox = tk.Text(qstn, height=4, width=40, font=txt_font)
+    _qstn_txtbox = tk.Text(
+        qstn, height=4, width=40, font=txt_font,
+        bg=theme.SURFACE, fg=theme.INK, insertbackground=theme.INK,
+        highlightthickness=1, highlightbackground=theme.BORDER, highlightcolor=theme.ACCENT,
+        relief=tk.FLAT, padx=8, pady=8,
+    )
     _qstn_txtbox.pack(side=tk.TOP)
     _qstn_txtbox.focus()
 

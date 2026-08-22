@@ -3,7 +3,7 @@ import subprocess
 import tkinter as tk
 from tkinter import ttk
 
-from gui import settings
+from gui import settings, theme
 from gui.asset.icon import icon_str
 
 root = tk.Tk()
@@ -21,6 +21,12 @@ _resolution_change_hook = None
 
 def scaled(value: float) -> int:
     return round(value * scale)
+
+
+def target_width() -> int:
+    """The window width this build/rebuild is targeting (the resolution the user
+    picked), derived the same way scale was: scale * _BASE_SIZE == that width."""
+    return round(scale * _BASE_SIZE)
 
 
 def register_min_height(height: int) -> None:
@@ -121,12 +127,12 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
 
 
 def _show_instructions():
-    instr_win = tk.Toplevel()
+    instr_win = tk.Toplevel(bg=theme.BG)
     instr_win.title('Instructions')
     instr_win.resizable(False, False)
     instr_win.grab_set()
 
-    instr_frame = tk.Frame(instr_win)
+    instr_frame = ttk.Frame(instr_win)
     instr_frame.pack(padx=scaled(15))
 
     instr_text = '1. Think of a problem\n' \
@@ -146,12 +152,12 @@ def _show_instructions():
 
 
 def _show_about():
-    about_win = tk.Toplevel()
+    about_win = tk.Toplevel(bg=theme.BG)
     about_win.title('About')
     about_win.resizable(False, False)
     about_win.grab_set()
 
-    about_frame = tk.Frame(about_win)
+    about_frame = ttk.Frame(about_win)
     about_frame.pack(padx=scaled(15))
 
     about_title = 'Three Coins'
@@ -183,6 +189,12 @@ def _show_about():
 def build():
     global scale
 
+    # Hidden until finalize() reveals it, so nothing (theme colors landing,
+    # widgets being packed one at a time) is visible mid-construction.
+    root.withdraw()
+
+    theme.apply(root)
+
     root.iconphoto(True, icon)
     root.title('Three Coins')
     root.resizable(False, False)
@@ -209,7 +221,10 @@ def build():
 
 
 def finalize():
-    """Size and center the root window. Call once all widgets (menu, input, output) are built."""
+    """Size, center, and reveal the root window. Call once all widgets (menu,
+    input, output) are built - see build()'s withdraw() for why it starts hidden.
+    """
     _, width, height = settings.load_resolution()
     height = max(height, _min_height)
     _center_window(root, width, height)
+    root.deiconify()

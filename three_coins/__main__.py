@@ -32,7 +32,7 @@ def main():
         gui_output.draw_true_info(true_hex)
 
         if not session.has_changing_lines:
-            gui_output.draw_no_change()
+            gui_output.draw_no_change(true_hex, session.lines)
             return
 
         reverse_binary = list(reversed(session.reverse_binary))
@@ -61,7 +61,7 @@ def main():
         gui_output.draw_true_info(true_hex)
 
         if not session.has_changing_lines:
-            gui_output.draw_no_change()
+            gui_output.draw_no_change(true_hex, session.lines)
             return
 
         reverse_binary = list(reversed(session.reverse_binary))
@@ -78,6 +78,11 @@ def main():
         gui_output.canvas_reset()
 
     def _on_resolution_changed():
+        # Hidden during rebuild for the same reason as the initial build (see
+        # gui.build()) - gui_output.build()'s probe would otherwise flash the
+        # worst-case hexagram text on screen again, mid-session.
+        gui.root.withdraw()
+
         question_text = gui_input.get_question()
 
         gui_input.destroy()
