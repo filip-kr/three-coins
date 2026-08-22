@@ -20,13 +20,7 @@ def main():
             gui_input.toss_enable()
             gui_input.reset_enable()
 
-    def _redraw_session():
-        for i, line in enumerate(session.lines):
-            gui_output.draw_line_left(i, line)
-
-        if not session.is_complete:
-            return
-
+    def _draw_result():
         true_binary = list(reversed(session.binary))
         true_hex = conn.get_by_binary(true_binary)
         gui_output.draw_true_info(true_hex)
@@ -39,6 +33,13 @@ def main():
         reverse_hex = conn.get_by_binary(reverse_binary)
         gui_output.draw_reverse_hex(reverse_binary)
         gui_output.draw_reverse_info(reverse_hex)
+
+    def _redraw_session():
+        for i, line in enumerate(session.lines):
+            gui_output.draw_line_left(i, line)
+
+        if session.is_complete:
+            _draw_result()
 
     def _on_toss():
         gui_input.reset_enable()
@@ -55,19 +56,7 @@ def main():
             return
 
         gui_input.toss_disable()
-
-        true_binary = list(reversed(session.binary))
-        true_hex = conn.get_by_binary(true_binary)
-        gui_output.draw_true_info(true_hex)
-
-        if not session.has_stressed_lines:
-            gui_output.draw_no_change(true_hex, session.lines)
-            return
-
-        reverse_binary = list(reversed(session.reverse_binary))
-        reverse_hex = conn.get_by_binary(reverse_binary)
-        gui_output.draw_reverse_hex(reverse_binary)
-        gui_output.draw_reverse_info(reverse_hex)
+        _draw_result()
 
     def _on_reset():
         gui_input.qstn_enable()

@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import font as tkfont
 from tkinter import ttk
 
 import gui
@@ -150,23 +149,35 @@ def destroy():
     _overframe.destroy()
 
 
-def _left_line_coordinates(count: int) -> tuple[int, int, int, int]:
-    x0, x1 = _s(_HEX_LINE_MARGIN), _s(_HEX_CANVAS_WIDTH - _HEX_LINE_MARGIN)
-    y0 = y1 = _s(300 - count * 50)
-    return x0, y0, x1, y1
+_LINE_SPACING = 50
+_TOP_LINE_Y = 50
+
+
+def _line_y(position_from_top: int) -> int:
+    return _s(_TOP_LINE_Y + position_from_top * _LINE_SPACING)
+
+
+def _line_x_bounds() -> tuple[int, int]:
+    return _s(_HEX_LINE_MARGIN), _s(_HEX_CANVAS_WIDTH - _HEX_LINE_MARGIN)
+
+
+def _draw_line(canvas: tk.Canvas, position_from_top: int, *, broken: bool, accent: bool = False) -> None:
+    x0, x1 = _line_x_bounds()
+    y = _line_y(position_from_top)
+
+    palette = theme.current()
+    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': palette.accent if accent else palette.ink}
+    if broken:
+        kwargs['dash'] = (_s(80), _s(40))
+
+    canvas.create_line((x0, y), (x1, y), **kwargs)
 
 
 def _draw_hex_line(canvas: tk.Canvas, count: int, line: LineType) -> None:
-    x0, y0, x1, y1 = _left_line_coordinates(count)
     is_broken = line in (LineType.STRESSED_MAGNETIC, LineType.MAGNETIC)
     is_stressed = line in (LineType.STRESSED_MAGNETIC, LineType.STRESSED_DYNAMIC)
-
-    palette = theme.current()
-    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': palette.accent if is_stressed else palette.ink}
-    if is_broken:
-        kwargs['dash'] = (_s(80), _s(40))
-
-    canvas.create_line((x0, y0), (x1, y1), **kwargs)
+    # count is toss order (0 = bottom/first toss); lines are drawn bottom-up.
+    _draw_line(canvas, 5 - count, broken=is_broken, accent=is_stressed)
 
 
 def draw_line_left(count: int, line: LineType):
@@ -174,19 +185,8 @@ def draw_line_left(count: int, line: LineType):
 
 
 def draw_reverse_hex(reverse_binary: list):
-    x0, x1 = _s(_HEX_LINE_MARGIN), _s(_HEX_CANVAS_WIDTH - _HEX_LINE_MARGIN)
-    y0 = y1 = _s(50)
-    step = _s(50)
-    ink = theme.current().ink
-
-    for bit_char in reverse_binary:
-        kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': ink}
-        if bit_char != '1':
-            kwargs['dash'] = (_s(80), _s(40))
-
-        _reverse_hex_canvas.create_line((x0, y0), (x1, y1), **kwargs)
-        y0 += step
-        y1 += step
+    for position, bit_char in enumerate(reverse_binary):
+        _draw_line(_reverse_hex_canvas, position, broken=(bit_char != '1'))
 
 
 def _apply_hex_info(tab: ttk.Frame, caption: ttk.Label, name: ttk.Label, subtitle: ttk.Label, hex_data: tuple):

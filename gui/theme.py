@@ -1,4 +1,7 @@
+from tkinter import ttk
 from typing import NamedTuple
+
+from gui import settings
 
 
 class Palette(NamedTuple):
@@ -48,8 +51,6 @@ _current = DEFAULT_THEME
 def load_saved() -> None:
     """Restore the last-selected theme from disk. Call once at startup."""
     global _current
-    from gui import settings
-
     name = settings.load_theme_name()
     _current = name if name in THEMES else DEFAULT_THEME
 
@@ -64,15 +65,11 @@ def current() -> Palette:
 
 def set_current(name: str) -> None:
     global _current
-    from gui import settings
-
     _current = name
     settings.save_theme_name(name)
 
 
 def apply(root) -> None:
-    from tkinter import ttk
-
     palette = current()
     root.configure(bg=palette.bg)
 
