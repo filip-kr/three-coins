@@ -18,6 +18,7 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
     s = gui.scaled
     base_size = tkfont.nametofont('TkDefaultFont').cget('size')
     txt_font = ('TkDefaultFont', s(base_size))
+    palette = theme.current()
 
     _input_frame = ttk.Frame(gui.root)
     _input_frame.pack(side=tk.TOP)
@@ -33,8 +34,8 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
 
     _qstn_txtbox = tk.Text(
         qstn, height=4, width=40, font=txt_font,
-        bg=theme.SURFACE, fg=theme.INK, insertbackground=theme.INK,
-        highlightthickness=1, highlightbackground=theme.BORDER, highlightcolor=theme.ACCENT,
+        bg=palette.surface, fg=palette.ink, insertbackground=palette.ink,
+        highlightthickness=1, highlightbackground=palette.border, highlightcolor=palette.accent,
         relief=tk.FLAT, padx=8, pady=8,
     )
     _qstn_txtbox.pack(side=tk.TOP)

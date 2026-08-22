@@ -76,7 +76,7 @@ def _build_tab_content(tab: ttk.Frame, wrap: int) -> tuple[tk.Canvas, ttk.Label,
 
     canvas = tk.Canvas(
         tab, width=s(_HEX_CANVAS_WIDTH), height=s(_HEX_CANVAS_HEIGHT),
-        bg=theme.SURFACE, highlightthickness=0, bd=0,
+        bg=theme.current().surface, highlightthickness=0, bd=0,
     )
     canvas.pack(side=tk.TOP, pady=(s(20), s(16)))
 
@@ -104,17 +104,20 @@ def build():
     _overframe = ttk.Frame(gui.root)
     _overframe.pack(side=tk.TOP, fill=tk.BOTH, padx=s(20), pady=s(20))
 
+    palette = theme.current()
     style = ttk.Style()
     # width is in characters, not pixels, but it still pins the tab to a fixed
     # size regardless of the actual text length - without it, a tab visibly
     # grows/shrinks as its title goes from empty to a 1- or 2-digit number.
     style.configure('TNotebook.Tab', font=('TkDefaultFont', s(14)), width=3, anchor='center')
-    style.configure('Caption.TLabel', font=('TkDefaultFont', s(11)), foreground=theme.INK_MUTED, background=theme.BG)
     style.configure(
-        'Name.TLabel', font=(theme.NAME_FONT_FAMILY, s(22)), foreground=theme.INK, background=theme.BG,
+        'Caption.TLabel', font=('TkDefaultFont', s(11)), foreground=palette.ink_muted, background=palette.bg,
     )
     style.configure(
-        'Subtitle.TLabel', font=('TkDefaultFont', s(13)), foreground=theme.INK_MUTED, background=theme.BG,
+        'Name.TLabel', font=(palette.name_font_family, s(22)), foreground=palette.ink, background=palette.bg,
+    )
+    style.configure(
+        'Subtitle.TLabel', font=('TkDefaultFont', s(13)), foreground=palette.ink_muted, background=palette.bg,
     )
 
     _notebook = ttk.Notebook(_overframe)
@@ -158,7 +161,8 @@ def _draw_hex_line(canvas: tk.Canvas, count: int, line: LineType) -> None:
     is_broken = line in (LineType.OLD_YIN, LineType.YOUNG_YIN)
     is_changing = line in (LineType.OLD_YIN, LineType.OLD_YANG)
 
-    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': theme.ACCENT if is_changing else theme.INK}
+    palette = theme.current()
+    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': palette.accent if is_changing else palette.ink}
     if is_broken:
         kwargs['dash'] = (_s(80), _s(40))
 
@@ -173,9 +177,10 @@ def draw_reverse_hex(reverse_binary: list):
     x0, x1 = _s(_HEX_LINE_MARGIN), _s(_HEX_CANVAS_WIDTH - _HEX_LINE_MARGIN)
     y0 = y1 = _s(50)
     step = _s(50)
+    ink = theme.current().ink
 
     for bit_char in reverse_binary:
-        kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': theme.INK}
+        kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': ink}
         if bit_char != '1':
             kwargs['dash'] = (_s(80), _s(40))
 

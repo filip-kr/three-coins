@@ -10,13 +10,15 @@ root = tk.Tk()
 icon = tk.PhotoImage(data=icon_str)
 
 _resolution_vars: dict[str, tk.BooleanVar] = {}
+_theme_vars: dict[str, tk.BooleanVar] = {}
+_menus: list[tk.Menu] = []
 
 _BASE_SIZE = settings.RESOLUTIONS[0][1]
 _MONITOR_RE = re.compile(r'(\d+)x(\d+)\+(\d+)\+(\d+)')
 
 scale: float = 1.0
 _min_height = 0
-_resolution_change_hook = None
+_rebuild_hook = None
 _current_resolution_label: str | None = None
 
 
@@ -49,13 +51,30 @@ def reset_min_height() -> None:
     _min_height = 0
 
 
-def set_resolution_change_hook(fn) -> None:
-    """Register the callback that rebuilds all widgets at the new scale whenever
-    the user picks a different resolution from the menu. Owned by three_coins,
-    since only it knows how to replay in-progress session state onto fresh
-    widgets; gui/__init__.py just needs to trigger it."""
-    global _resolution_change_hook
-    _resolution_change_hook = fn
+def set_rebuild_hook(fn) -> None:
+    """Register the callback that rebuilds all widgets whenever the user picks a
+    different resolution or theme from the menu. Owned by three_coins, since
+    only it knows how to replay in-progress session state onto fresh widgets;
+    gui/__init__.py just needs to trigger it."""
+    global _rebuild_hook
+    _rebuild_hook = fn
+
+
+def refresh_theme() -> None:
+    """Re-apply the current theme's base ttk styles. Rebuilding widgets (see
+    set_rebuild_hook) recreates their own per-widget styling fresh already, but
+    the shared base styles (TFrame/TLabel/TButton/TNotebook) are only otherwise
+    set once, in build() - a theme change needs them redone too.
+
+    The menu bar and its cascades are also built once in build() and never
+    rebuilt, and Tk's option database (which theme.apply() writes to) doesn't
+    retroactively restyle a menu that already exists - so they're recolored
+    directly here as well, or a theme switch would leave the menu showing
+    stale colors until the app restarts.
+    """
+    theme.apply(root)
+    for menu in _menus:
+        theme.style_menu(menu)
 
 
 def _primary_monitor_geometry() -> tuple[int, int, int, int] | None:
@@ -129,14 +148,33 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
     scale = width / _BASE_SIZE
     settings.save_resolution(width, height)
 
-    if _resolution_change_hook is not None:
-        _resolution_change_hook()
+    if _rebuild_hook is not None:
+        _rebuild_hook()
     else:
         _center_window(root, width, max(height, _min_height))
 
 
+def _on_theme_selected(name: str) -> None:
+    if name == theme.current_name():
+        # See _on_resolution_selected - clicking an already-checked checkbutton
+        # menu item unchecks it before the command runs; restore it and skip
+        # the rebuild, since nothing is actually changing.
+        _theme_vars[name].set(True)
+        return
+
+    for theme_name, var in _theme_vars.items():
+        var.set(theme_name == name)
+
+    theme.set_current(name)
+
+    if _rebuild_hook is not None:
+        _rebuild_hook()
+    else:
+        refresh_theme()
+
+
 def _show_instructions():
-    instr_win = tk.Toplevel(bg=theme.BG)
+    instr_win = tk.Toplevel(bg=theme.current().bg)
     instr_win.title('Instructions')
     instr_win.resizable(False, False)
     instr_win.transient(root)
@@ -163,7 +201,7 @@ def _show_instructions():
 
 
 def _show_about():
-    about_win = tk.Toplevel(bg=theme.BG)
+    about_win = tk.Toplevel(bg=theme.current().bg)
     about_win.title('About')
     about_win.resizable(False, False)
     about_win.transient(root)
@@ -206,6 +244,7 @@ def build():
     # widgets being packed one at a time) is visible mid-construction.
     root.withdraw()
 
+    theme.load_saved()
     theme.apply(root)
 
     root.iconphoto(True, icon)
@@ -216,10 +255,15 @@ def build():
     _current_resolution_label = current_label
     scale = width / _BASE_SIZE
 
-    root_menu = tk.Menu(root)
+    root_menu = tk.Menu(root, tearoff=False)
     root.config(menu=root_menu)
 
-    resolution_menu = tk.Menu(root_menu, tearoff=False)
+    root_menu.add_command(label='Instructions', command=_show_instructions)
+
+    settings_menu = tk.Menu(root_menu, tearoff=False)
+    root_menu.add_cascade(label='Settings', menu=settings_menu)
+
+    resolution_menu = tk.Menu(settings_menu, tearoff=False)
     for res_label, res_width, res_height in settings.RESOLUTIONS:
         var = tk.BooleanVar(value=(res_label == current_label))
         _resolution_vars[res_label] = var
@@ -228,10 +272,24 @@ def build():
             variable=var,
             command=lambda l=res_label, w=res_width, h=res_height: _on_resolution_selected(l, w, h),
         )
-    root_menu.add_cascade(label='Resolution', menu=resolution_menu)
+    settings_menu.add_cascade(label='Resolution', menu=resolution_menu)
 
-    root_menu.add_command(label='Instructions', command=_show_instructions)
+    theme_menu = tk.Menu(settings_menu, tearoff=False)
+    for theme_name in theme.THEMES:
+        var = tk.BooleanVar(value=(theme_name == theme.current_name()))
+        _theme_vars[theme_name] = var
+        theme_menu.add_checkbutton(
+            label=theme_name,
+            variable=var,
+            command=lambda n=theme_name: _on_theme_selected(n),
+        )
+    settings_menu.add_cascade(label='Theme', menu=theme_menu)
+
     root_menu.add_command(label='About', command=_show_about)
+
+    _menus[:] = [root_menu, settings_menu, resolution_menu, theme_menu]
+    for menu in _menus:
+        theme.style_menu(menu)
 
 
 def finalize():

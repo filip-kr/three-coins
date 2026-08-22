@@ -16,11 +16,27 @@ _CONFIG_DIR = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) /
 _CONFIG_FILE = _CONFIG_DIR / 'settings.json'
 
 
-def load_resolution() -> tuple[str, int, int]:
+def _load_data() -> dict:
     try:
-        data = json.loads(_CONFIG_FILE.read_text())
+        return json.loads(_CONFIG_FILE.read_text())
+    except (OSError, ValueError, json.JSONDecodeError):
+        return {}
+
+
+def _save_data(updates: dict) -> None:
+    # Read-modify-write rather than overwrite, so saving one setting (e.g.
+    # resolution) never clobbers another (e.g. theme) already on disk.
+    data = _load_data()
+    data.update(updates)
+    _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    _CONFIG_FILE.write_text(json.dumps(data))
+
+
+def load_resolution() -> tuple[str, int, int]:
+    data = _load_data()
+    try:
         width, height = int(data['width']), int(data['height'])
-    except (OSError, ValueError, KeyError, json.JSONDecodeError):
+    except (KeyError, ValueError, TypeError):
         return DEFAULT_RESOLUTION
 
     for label, saved_width, saved_height in RESOLUTIONS:
@@ -31,5 +47,13 @@ def load_resolution() -> tuple[str, int, int]:
 
 
 def save_resolution(width: int, height: int) -> None:
-    _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-    _CONFIG_FILE.write_text(json.dumps({'width': width, 'height': height}))
+    _save_data({'width': width, 'height': height})
+
+
+def load_theme_name() -> str | None:
+    name = _load_data().get('theme')
+    return name if isinstance(name, str) else None
+
+
+def save_theme_name(name: str) -> None:
+    _save_data({'theme': name})

@@ -77,10 +77,12 @@ def main():
         session.reset()
         gui_output.canvas_reset()
 
-    def _on_resolution_changed():
-        # Hidden during rebuild for the same reason as the initial build (see
-        # gui.build()) - gui_output.build()'s probe would otherwise flash the
-        # worst-case hexagram text on screen again, mid-session.
+    def _rebuild_ui():
+        """Destroy and recreate all widgets, then replay the in-progress session
+        onto them. Triggered by either a resolution or a theme change (see
+        gui.set_rebuild_hook) - hidden while it runs so nothing partially
+        restyled/resized flashes on screen mid-rebuild.
+        """
         gui.root.withdraw()
 
         question_text = gui_input.get_question()
@@ -89,6 +91,7 @@ def main():
         gui_output.destroy()
         gui.reset_min_height()
 
+        gui.refresh_theme()
         gui_input.build(_on_toss, _on_reset)
         gui_output.build()
 
@@ -99,7 +102,7 @@ def main():
         gui.finalize()
 
     gui.build()
-    gui.set_resolution_change_hook(_on_resolution_changed)
+    gui.set_rebuild_hook(_rebuild_ui)
     gui_input.build(_on_toss, _on_reset)
     gui_output.build()
 
