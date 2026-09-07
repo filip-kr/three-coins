@@ -2,10 +2,8 @@ import json
 import os
 from pathlib import Path
 
-# The label only names width, not "WxH": the window's height is content-driven
-# (gui.finalize() grows it to fit the fixed-size tab layout, see
-# gui.register_min_height) and is reliably taller than the width, so a "WxW"
-# label would promise a square window this app never actually shows.
+# Labels name width only: height is content-driven (gui.finalize() grows to fit
+# the tab layout), so the stored height is just a starting minimum.
 RESOLUTIONS = [
     ('Small (800px wide)', 800, 800),
     ('Medium (1000px wide)', 1000, 1000),
@@ -28,8 +26,7 @@ def _load_data() -> dict:
 
 
 def _save_data(updates: dict) -> None:
-    # Read-modify-write rather than overwrite, so saving one setting (e.g.
-    # resolution) never clobbers another (e.g. theme) already on disk.
+    # Merge into the existing file so one setting's save doesn't drop the others.
     data = _load_data()
     data.update(updates)
     _CONFIG_DIR.mkdir(parents=True, exist_ok=True)

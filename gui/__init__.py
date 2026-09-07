@@ -27,65 +27,44 @@ def scaled(value: float) -> int:
 
 
 def target_width() -> int:
-    """The window width this build/rebuild is targeting (the resolution the user
-    picked), derived the same way scale was: scale * _BASE_SIZE == that width."""
+    """Pixel width of the resolution this build is targeting."""
     return round(scale * _BASE_SIZE)
 
 
 def register_min_height(height: int) -> None:
-    """Raise the floor under the root window's final height.
-
-    Explicit .geometry() calls disable Tk's automatic resize-to-fit-content, so a
-    window sized from empty widgets at startup won't grow later when real (and
-    possibly long, wrapped) hexagram text is drawn in. Callers that know their
-    worst-case content size ahead of time report it here before finalize() runs.
-    """
+    """Raise the floor under the root window's final height. finalize() sets an
+    explicit geometry, which disables Tk's grow-to-fit, so callers that know their
+    worst-case content height must report it here before finalize() runs."""
     global _min_height
     _min_height = max(_min_height, height)
 
 
 def reset_min_height() -> None:
-    """Clear the registered floor so a rebuild's fresh probe isn't inflated by a
-    previous (possibly larger-scale) build's leftover value."""
+    """Clear the floor so a rebuild re-probes from scratch."""
     global _min_height
     _min_height = 0
 
 
 def set_rebuild_hook(fn) -> None:
-    """Register the callback that rebuilds all widgets whenever the user picks a
-    different resolution or theme from the menu. Owned by three_coins, since
-    only it knows how to replay in-progress session state onto fresh widgets;
-    gui/__init__.py just needs to trigger it."""
+    """Register the callback that rebuilds all widgets on a resolution or theme
+    change. Owned by three_coins, which knows how to replay session state."""
     global _rebuild_hook
     _rebuild_hook = fn
 
 
 def refresh_theme() -> None:
-    """Re-apply the current theme's base ttk styles. Rebuilding widgets (see
-    set_rebuild_hook) recreates their own per-widget styling fresh already, but
-    the shared base styles (TFrame/TLabel/TButton/TNotebook) are only otherwise
-    set once, in build() - a theme change needs them redone too.
-
-    The menu bar and its cascades are also built once in build() and never
-    rebuilt, and Tk's option database (which theme.apply() writes to) doesn't
-    retroactively restyle a menu that already exists - so they're recolored
-    directly here as well, or a theme switch would leave the menu showing
-    stale colors until the app restarts.
-    """
+    """Re-apply the theme's shared ttk styles and recolor the menus. Both are set
+    once in build() and aren't recreated by a widget rebuild, so a theme change
+    has to redo them here (menus especially - see theme.style_menu)."""
     theme.apply(root)
     for menu in _menus:
         theme.style_menu(menu)
 
 
 def _primary_monitor_geometry() -> tuple[int, int, int, int] | None:
-    """(x, y, width, height) of the primary/first connected monitor, or None if undetectable.
-
-    winfo_screenwidth/height() report the combined virtual desktop across all
-    monitors, which can be offset or misaligned between monitors (e.g. a laptop
-    panel positioned lower than an external display). Centering against that
-    combined size can place a window straddling monitors or in the gap between
-    them, so we center against a single monitor's real bounds instead.
-    """
+    """(x, y, width, height) of the primary monitor, or None if undetectable.
+    winfo_screenwidth/height() span the whole multi-monitor desktop, so centering
+    against them can drop the window in the gap between screens."""
     try:
         output = subprocess.run(
             ['xrandr', '--query'], capture_output=True, text=True, timeout=2, check=True,
@@ -120,11 +99,8 @@ def _center_window(win: tk.Wm, width: int, height: int) -> None:
 
 
 def _center_to_content(win: tk.Toplevel, min_width: int, min_height: int) -> None:
-    """Center win at (min_width, min_height), growing to fit its packed content if larger.
-
-    Content built from measured text/fonts (long hexagram names, HiDPI font metrics)
-    can need more room than a guessed baseline, so the guess is only ever a floor.
-    """
+    """Center win, using (min_width, min_height) as a floor and growing to fit
+    packed content when measured text needs more room."""
     win.update_idletasks()
     width = max(min_width, win.winfo_reqwidth())
     height = max(min_height, win.winfo_reqheight())
@@ -135,9 +111,8 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
     global scale, _current_resolution_label
 
     if label == _current_resolution_label:
-        # Clicking a checkbutton menu item toggles it before the command runs,
-        # so re-clicking the already-active resolution would otherwise show it
-        # as unchecked - restore it and skip the rebuild, since nothing changed.
+        # Re-clicking the active item: undo the checkbutton's auto-toggle and
+        # skip the rebuild.
         _resolution_vars[label].set(True)
         return
 
@@ -156,9 +131,7 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
 
 def _on_theme_selected(name: str) -> None:
     if name == theme.current_name():
-        # See _on_resolution_selected - clicking an already-checked checkbutton
-        # menu item unchecks it before the command runs; restore it and skip
-        # the rebuild, since nothing is actually changing.
+        # Re-clicking the active item - see _on_resolution_selected.
         _theme_vars[name].set(True)
         return
 
@@ -240,8 +213,7 @@ def _show_about():
 def build():
     global scale, _current_resolution_label
 
-    # Hidden until finalize() reveals it, so nothing (theme colors landing,
-    # widgets being packed one at a time) is visible mid-construction.
+    # Stay hidden until finalize() reveals it, so construction isn't visible.
     root.withdraw()
 
     theme.load_saved()
@@ -293,9 +265,7 @@ def build():
 
 
 def finalize():
-    """Size, center, and reveal the root window. Call once all widgets (menu,
-    input, output) are built - see build()'s withdraw() for why it starts hidden.
-    """
+    """Size, center, and reveal the root window. Call after all widgets are built."""
     _, width, height = settings.load_resolution()
     height = max(height, _min_height)
     _center_window(root, width, height)

@@ -48,8 +48,7 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
     rst_btn.pack(side=tk.RIGHT, ipadx=s(10), ipady=s(10))
     rst_btn.config(state=tk.DISABLED)
 
-    # ttk.Style is global, so this also re-applies to (and thereby scales) any
-    # already-existing button using the default style.
+    # ttk.Style is global: this also rescales any buttons already built.
     ttk.Style().configure('TButton', font=txt_font)
 
 

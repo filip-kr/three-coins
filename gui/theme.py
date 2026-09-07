@@ -49,7 +49,6 @@ _current = DEFAULT_THEME
 
 
 def load_saved() -> None:
-    """Restore the last-selected theme from disk. Call once at startup."""
     global _current
     name = settings.load_theme_name()
     _current = name if name in THEMES else DEFAULT_THEME
@@ -105,14 +104,9 @@ def apply(root) -> None:
 
 
 def style_menu(menu) -> None:
-    """Color a single tk.Menu (bar or cascade) to the current theme.
-
-    The *option_add calls in apply() only affect menus created afterward - Tk's
-    option database doesn't retroactively restyle a menu that already exists,
-    and the app's menu bar is built once at startup, not recreated on a theme
-    change. Callers that keep a menu alive across a theme switch need to
-    re-call this directly on it.
-    """
+    """Recolor an existing tk.Menu to the current theme. apply()'s option_add
+    calls only reach menus built afterward, so menus that outlive a theme switch
+    (the menu bar, its cascades) must be restyled here directly."""
     palette = current()
     menu.configure(
         bg=palette.surface, fg=palette.ink,

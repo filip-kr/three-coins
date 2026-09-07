@@ -67,11 +67,8 @@ def main():
         gui_output.canvas_reset()
 
     def _rebuild_ui():
-        """Destroy and recreate all widgets, then replay the in-progress session
-        onto them. Triggered by either a resolution or a theme change (see
-        gui.set_rebuild_hook) - hidden while it runs so nothing partially
-        restyled/resized flashes on screen mid-rebuild.
-        """
+        """Rebuild all widgets and replay the in-progress session onto them, on a
+        resolution or theme change. Hidden while it runs to avoid flicker."""
         gui.root.withdraw()
 
         question_text = gui_input.get_question()

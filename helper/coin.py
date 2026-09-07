@@ -7,12 +7,10 @@ _TAILS = 'T'
 
 
 def toss_three() -> LineType:
-    """Per James DeKorne's The Gnostic Book of Changes (ch. 5), following Wilhelm:
-    heads is the coin's inscribed, magnetic (yin) side; tails its reverse, dynamic
-    (yang) side. A mixed throw takes the gender of its minority coin; a unanimous
-    throw is a stressed line in the gender of that shared face. DeKorne considers
-    the older numerical formula (summing 2s and 3s to get 6-9) obsolete for the
-    coin oracle, so this counts heads/tails directly instead.
+    """Coin-count method from James DeKorne's The Gnostic Book of Changes (ch. 5):
+    heads = magnetic (yin) face, tails = dynamic (yang). A mixed throw takes its
+    minority gender; a unanimous throw is a stressed (changing) line of that
+    gender. Counts faces directly rather than via the older 6-9 sum.
     """
     heads = sum(random.choice((_HEADS, _TAILS)) == _HEADS for _ in range(3))
 
