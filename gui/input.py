@@ -12,6 +12,11 @@ toss_btn: ttk.Button | None = None
 rst_btn: ttk.Button | None = None
 
 
+def _select_all(event: tk.Event) -> str:
+    event.widget.tag_add(tk.SEL, '1.0', 'end-1c')
+    return 'break'  # suppress Tk's default (cursor to line start)
+
+
 def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
     global _input_frame, _qstn_txtbox, toss_btn, rst_btn
 
@@ -33,13 +38,16 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
     qstn_label.pack(side=tk.TOP, ipady=s(10))
 
     _qstn_txtbox = tk.Text(
-        qstn, height=4, width=40, font=txt_font,
+        qstn, height=4, width=40, font=txt_font, wrap=tk.WORD,
         bg=palette.surface, fg=palette.ink, insertbackground=palette.ink,
         highlightthickness=1, highlightbackground=palette.border, highlightcolor=palette.accent,
         relief=tk.FLAT, padx=8, pady=8,
     )
     _qstn_txtbox.pack(side=tk.TOP)
     _qstn_txtbox.focus()
+
+    _qstn_txtbox.bind('<Control-a>', _select_all)
+    _qstn_txtbox.bind('<Control-A>', _select_all)
 
     toss_btn = ttk.Button(btns, text='Toss coins', command=on_toss)
     toss_btn.pack(side=tk.LEFT, ipadx=s(10), ipady=s(10))
