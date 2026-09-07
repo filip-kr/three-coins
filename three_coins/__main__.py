@@ -96,6 +96,7 @@ def main():
     gui.set_rebuild_hook(_rebuild_ui)
     gui.set_theme_preview_hook(_preview_theme)
     gui.set_background_hook(gui_output.redraw_background)
+    gui.set_linestyle_hook(gui_output.redraw_lines)
     gui_input.build(_on_toss, _on_reset)
     gui_output.build()
 

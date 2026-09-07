@@ -67,3 +67,12 @@ def load_background_name() -> str | None:
 
 def save_background_name(name: str) -> None:
     _save_data({'background': name})
+
+
+def load_line_style_name() -> str | None:
+    name = _load_data().get('line_style')
+    return name if isinstance(name, str) else None
+
+
+def save_line_style_name(name: str) -> None:
+    _save_data({'line_style': name})

@@ -3,7 +3,7 @@ import subprocess
 import tkinter as tk
 from tkinter import ttk
 
-from gui import background, settings, theme
+from gui import background, linestyle, settings, theme
 from gui.asset.icon import icon_str
 
 root = tk.Tk()
@@ -20,6 +20,7 @@ _min_height = 0
 _rebuild_hook = None
 _theme_preview_hook = None
 _background_hook = None
+_linestyle_hook = None
 _current_resolution_label: str | None = None
 
 
@@ -64,6 +65,12 @@ def set_background_hook(fn) -> None:
     """Register the callback that repaints the canvas backdrops (Background menu)."""
     global _background_hook
     _background_hook = fn
+
+
+def set_linestyle_hook(fn) -> None:
+    """Register the callback that repaints the hexagram lines (Line style menu)."""
+    global _linestyle_hook
+    _linestyle_hook = fn
 
 
 def refresh_theme() -> None:
@@ -158,7 +165,8 @@ def _active_menu_label(widget) -> str | None:
 
 class _PreviewMenu:
     """A Settings submenu that previews an entry on hover and reverts if it closes
-    with no pick. Theme and Background each configure one with their own callbacks."""
+    with no pick. Theme, Background and Line style each configure one with their
+    own callbacks."""
 
     def __init__(self, names, *, current, committed, preview, clear_preview, apply, commit):
         self._names = list(names)
@@ -225,6 +233,11 @@ def _paint_background() -> None:
         _background_hook()
 
 
+def _paint_lines() -> None:
+    if _linestyle_hook is not None:
+        _linestyle_hook()
+
+
 def _commit_theme(name: str) -> None:
     theme.set_current(name)
     (_rebuild_hook or refresh_theme)()
@@ -233,6 +246,11 @@ def _commit_theme(name: str) -> None:
 def _commit_background(name: str) -> None:
     background.set_current(name)
     _paint_background()
+
+
+def _commit_linestyle(name: str) -> None:
+    linestyle.set_current(name)
+    _paint_lines()
 
 
 _theme_ctl = _PreviewMenu(
@@ -246,6 +264,12 @@ _background_ctl = _PreviewMenu(
     current=background.current_name, committed=background.committed_name,
     preview=background.preview, clear_preview=background.clear_preview,
     apply=_paint_background, commit=_commit_background,
+)
+_linestyle_ctl = _PreviewMenu(
+    linestyle.NAMES,
+    current=linestyle.current_name, committed=linestyle.committed_name,
+    preview=linestyle.preview, clear_preview=linestyle.clear_preview,
+    apply=_paint_lines, commit=_commit_linestyle,
 )
 
 
@@ -321,6 +345,7 @@ def build():
 
     theme.load_saved()
     background.load_saved()
+    linestyle.load_saved()
     theme.apply(root)
 
     root.iconphoto(True, icon)
@@ -352,10 +377,11 @@ def build():
 
     theme_menu = _theme_ctl.build(settings_menu, 'Theme')
     background_menu = _background_ctl.build(settings_menu, 'Background')
+    linestyle_menu = _linestyle_ctl.build(settings_menu, 'Line style')
 
     root_menu.add_command(label='About', command=_show_about)
 
-    _menus[:] = [root_menu, settings_menu, resolution_menu, theme_menu, background_menu]
+    _menus[:] = [root_menu, settings_menu, resolution_menu, theme_menu, background_menu, linestyle_menu]
     for menu in _menus:
         theme.style_menu(menu)
 

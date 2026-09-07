@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import gui
-from gui import background, theme
+from gui import background, linestyle, theme
 from helper.line_type import LineType
 
 _overframe: ttk.Frame | None = None
@@ -24,6 +24,10 @@ _HEX_CANVAS_HEIGHT = 350
 _HEX_LINE_MARGIN = (_HEX_CANVAS_WIDTH - 200) // 2
 _HEX_LINE_WIDTH = 14
 _HEX_TOP_PAD = 115  # see _build_tab_content
+
+# What's currently drawn on each canvas, so redraw_lines() can repaint it in a
+# new line style without the session: side -> [(position_from_top, broken, accent)]
+_lines: dict[str, list] = {'true': [], 'reverse': []}
 
 # Fixed, not measured from content, so tab contents never shift on a redraw.
 _TAB_CONTENT_HEIGHT = 660
@@ -119,6 +123,8 @@ def build():
 
     _scale = gui.scale
     s = _s
+    _lines['true'].clear()
+    _lines['reverse'].clear()
 
     _overframe = ttk.Frame(gui.root)
     _overframe.pack(side=tk.TOP, fill=tk.BOTH, padx=s(20), pady=s(20))
@@ -165,20 +171,30 @@ def _line_x_bounds() -> tuple[int, int]:
     return _s(_HEX_LINE_MARGIN), _s(_HEX_CANVAS_WIDTH - _HEX_LINE_MARGIN)
 
 
-def _draw_line(canvas: tk.Canvas, position_from_top: int, *, broken: bool, accent: bool = False) -> None:
+def _side(canvas: tk.Canvas) -> str:
+    return 'true' if canvas is _true_hex_canvas else 'reverse'
+
+
+def _paint_line(canvas: tk.Canvas, position_from_top: int, broken: bool, accent: bool) -> None:
     x0, x1 = _line_x_bounds()
-    y = _line_y(position_from_top)
-
     palette = theme.current()
-    kwargs = {
-        'width': _s(_HEX_LINE_WIDTH),
-        'fill': palette.accent if accent else palette.ink,
-        'tags': ('accent',) if accent else ('ink',),  # so restyle() can recolor
-    }
-    if broken:
-        kwargs['dash'] = (_s(80), _s(40))
+    linestyle.draw(
+        canvas, x0, x1, _line_y(position_from_top), _s(_HEX_LINE_WIDTH),
+        broken=broken, color=palette.accent if accent else palette.ink,
+        tags=('line', 'accent') if accent else ('line', 'ink'),  # 'line' to clear, colour tag for restyle()
+    )
 
-    canvas.create_line((x0, y), (x1, y), **kwargs)
+
+def _draw_line(canvas: tk.Canvas, position_from_top: int, *, broken: bool, accent: bool = False) -> None:
+    _lines[_side(canvas)].append((position_from_top, broken, accent))
+    _paint_line(canvas, position_from_top, broken, accent)
+
+
+def redraw_lines() -> None:
+    for side, canvas in (('true', _true_hex_canvas), ('reverse', _reverse_hex_canvas)):
+        canvas.delete('line')
+        for position, broken, accent in _lines[side]:
+            _paint_line(canvas, position, broken, accent)
 
 
 def _draw_hex_line(canvas: tk.Canvas, count: int, line: LineType) -> None:
@@ -224,6 +240,8 @@ def draw_no_change(true_hex: tuple, lines: list[LineType]):
 
 
 def canvas_reset():
+    _lines['true'].clear()
+    _lines['reverse'].clear()
     for canvas in _canvases():
         canvas.delete('all')
     redraw_background()
