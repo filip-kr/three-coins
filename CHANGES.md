@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Release executables are now named `three_coins_vX.X.X_x86_64`. The bare `three_coins_v2.1.1` name ends in `.1`, which desktop environments match as a `man` page (`*.1`) rather than an executable - so double-clicking it opened a text/manual viewer instead of running. The `_x86_64` suffix also states the target architecture up front.
 - About dialog now shows `v2.1.1`.
 
 ### Internal

@@ -7,7 +7,7 @@
 
 A simple Linux desktop application for I Ching divination using the 3-coin method.
 <br>
-Precompiled executables ```three_coins_vX.X.X``` can be found in Releases.
+Precompiled executables ```three_coins_vX.X.X_x86_64``` can be found in Releases.
 
 **Disclaimer:** Starting with v2.0.0, AI was used to assist in developing this application.
 
@@ -17,13 +17,13 @@ Precompiled executables ```three_coins_vX.X.X``` can be found in Releases.
 
 ### Running the precompiled executable
 
-Each release's ```three_coins_vX.X.X``` is a self-contained, single-file build for 64-bit Linux (x86_64), produced with PyInstaller. It bundles the Python runtime, the Tcl/Tk GUI toolkit, the `apsw`/SQLite dependency, and the hexagram database - no separate Python, pip, or apt install is needed to run it.
+Each release's ```three_coins_vX.X.X_x86_64``` is a self-contained, single-file build for 64-bit Linux (x86_64), produced with PyInstaller. It bundles the Python runtime, the Tcl/Tk GUI toolkit, the `apsw`/SQLite dependency, and the hexagram database - no separate Python, pip, or apt install is needed to run it.
 
 To run it:
 
 ```bash
-chmod +x three_coins_vX.X.X
-./three_coins_vX.X.X
+chmod +x three_coins_vX.X.X_x86_64
+./three_coins_vX.X.X_x86_64
 ```
 
 **System requirements:**
@@ -36,7 +36,7 @@ chmod +x three_coins_vX.X.X
 **Verifying your download:** each release includes a `.sha256` checksum file alongside the executable. Verify with:
 
 ```bash
-sha256sum -c three_coins_vX.X.X.sha256
+sha256sum -c three_coins_vX.X.X_x86_64.sha256
 ```
 
 ### Settings
