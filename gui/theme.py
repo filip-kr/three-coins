@@ -44,6 +44,7 @@ THEMES: dict[str, Palette] = {
 }
 
 DEFAULT_THEME = 'Parchment'
+NAMES = list(THEMES)
 
 # _current is painted now; _committed is saved. They differ only mid-preview().
 _current = DEFAULT_THEME

@@ -22,8 +22,9 @@ def _ink(canvas, x0, x1, y, width, color, tags, *, full):
     # (per line / per segment) so redraws don't shimmer.
     fx0, fx1 = full
     h = width * 0.46
-    arch = (fx1 - fx0) * 0.014 * random.Random(hash((round(fx0), round(fx1), round(y)))).uniform(0.85, 1.15)
-    edge = random.Random(hash((round(x0), round(x1), round(y))))
+    arch_rng = random.Random(hash((round(fx0), round(fx1), round(y))))  # per whole line
+    edge_rng = random.Random(hash((round(x0), round(x1), round(y))))    # per segment
+    arch = (fx1 - fx0) * 0.014 * arch_rng.uniform(0.85, 1.15)
     steps = max(6, round((x1 - x0) / (h * 1.3)))
 
     def half(sign):
@@ -31,8 +32,8 @@ def _ink(canvas, x0, x1, y, width, color, tags, *, full):
         for k in range(steps + 1):
             px = x0 + k / steps * (x1 - x0)
             centre = y - arch * math.sin(math.pi * (px - fx0) / (fx1 - fx0))
-            dip = edge.uniform(0.06, 0.16) if k in (0, steps) else 0.0  # blunt end taper
-            row.append((px, centre + sign * (h - (edge.uniform(0, 0.1) + dip) * width)))
+            dip = edge_rng.uniform(0.06, 0.16) if k in (0, steps) else 0.0  # blunt end taper
+            row.append((px, centre + sign * (h - (edge_rng.uniform(0, 0.1) + dip) * width)))
         return row
 
     pts = []

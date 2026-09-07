@@ -12,15 +12,16 @@ icon = tk.PhotoImage(data=icon_str)
 _resolution_vars: dict[str, tk.BooleanVar] = {}
 _menus: list[tk.Menu] = []
 
+# Callbacks three_coins registers via set_hook(): 'rebuild' (full widget rebuild)
+# and 'theme_preview' / 'background' / 'linestyle' (in-place repaints for menu
+# hover preview). Kept here because gui/ can't import the modules that own them.
+_hooks: dict[str, object] = {}
+
 _BASE_SIZE = settings.RESOLUTIONS[0][1]
 _MONITOR_RE = re.compile(r'(\d+)x(\d+)\+(\d+)\+(\d+)')
 
 scale: float = 1.0
 _min_height = 0
-_rebuild_hook = None
-_theme_preview_hook = None
-_background_hook = None
-_linestyle_hook = None
 _current_resolution_label: str | None = None
 
 
@@ -31,6 +32,16 @@ def scaled(value: float) -> int:
 def target_width() -> int:
     """Pixel width of the resolution this build is targeting."""
     return round(scale * _BASE_SIZE)
+
+
+def set_hook(name: str, fn) -> None:
+    _hooks[name] = fn
+
+
+def _run_hook(name: str) -> None:
+    fn = _hooks.get(name)
+    if fn is not None:
+        fn()
 
 
 def register_min_height(height: int) -> None:
@@ -45,32 +56,6 @@ def reset_min_height() -> None:
     """Clear the floor so a rebuild re-probes from scratch."""
     global _min_height
     _min_height = 0
-
-
-def set_rebuild_hook(fn) -> None:
-    """Register the callback that rebuilds all widgets on a resolution or theme
-    change. Owned by three_coins, which knows how to replay session state."""
-    global _rebuild_hook
-    _rebuild_hook = fn
-
-
-def set_theme_preview_hook(fn) -> None:
-    """Like set_rebuild_hook, but recolors widgets in place - no rebuild, no
-    persist - for Theme-menu hover preview."""
-    global _theme_preview_hook
-    _theme_preview_hook = fn
-
-
-def set_background_hook(fn) -> None:
-    """Register the callback that repaints the canvas backdrops (Background menu)."""
-    global _background_hook
-    _background_hook = fn
-
-
-def set_linestyle_hook(fn) -> None:
-    """Register the callback that repaints the hexagram lines (Line style menu)."""
-    global _linestyle_hook
-    _linestyle_hook = fn
 
 
 def refresh_theme() -> None:
@@ -132,9 +117,7 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
     global scale, _current_resolution_label
 
     if label == _current_resolution_label:
-        # Re-clicking the active item: undo the checkbutton's auto-toggle and
-        # skip the rebuild.
-        _resolution_vars[label].set(True)
+        _resolution_vars[label].set(True)  # undo the checkbutton's auto-toggle; nothing changed
         return
 
     for res_label, var in _resolution_vars.items():
@@ -144,8 +127,9 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
     scale = width / _BASE_SIZE
     settings.save_resolution(width, height)
 
-    if _rebuild_hook is not None:
-        _rebuild_hook()
+    rebuild = _hooks.get('rebuild')
+    if rebuild is not None:
+        rebuild()
     else:
         _center_window(root, width, max(height, _min_height))
 
@@ -165,27 +149,30 @@ def _active_menu_label(widget) -> str | None:
 
 class _PreviewMenu:
     """A Settings submenu that previews an entry on hover and reverts if it closes
-    with no pick. Theme, Background and Line style each configure one with their
-    own callbacks."""
+    with no pick. `mod` is a settings module (theme / background / linestyle) with
+    the NAMES / *_name / preview / clear_preview / set_current protocol; `apply`
+    repaints for a preview, `commit` for a committed pick (defaults to `apply`)."""
 
-    def __init__(self, names, *, current, committed, preview, clear_preview, apply, commit):
-        self._names = list(names)
-        self._current, self._committed = current, committed
-        self._preview, self._clear_preview = preview, clear_preview
-        self._apply, self._commit = apply, commit
+    def __init__(self, mod, *, apply, commit=None):
+        self._mod = mod
+        self._apply = apply
+        self._commit = commit or apply
         self._vars: dict[str, tk.BooleanVar] = {}
         self._revert_id: str | None = None
 
     def build(self, parent: tk.Menu, label: str) -> tk.Menu:
         menu = tk.Menu(parent, tearoff=False)
-        for name in self._names:
-            var = tk.BooleanVar(value=(name == self._committed()))
+        for name in self._mod.NAMES:
+            var = tk.BooleanVar(value=(name == self._mod.committed_name()))
             self._vars[name] = var
             menu.add_checkbutton(label=name, variable=var, command=lambda n=name: self._select(n))
         menu.bind('<<MenuSelect>>', self._hover)  # fires on highlight change, i.e. hover
         menu.bind('<Unmap>', self._closed)
         parent.add_cascade(label=label, menu=menu)
         return menu
+
+    def _dirty(self) -> bool:
+        return self._mod.current_name() != self._mod.committed_name()
 
     def _cancel_pending(self) -> None:
         if self._revert_id is not None:
@@ -194,21 +181,21 @@ class _PreviewMenu:
 
     def _hover(self, event) -> None:
         name = _active_menu_label(event.widget)
-        if name in self._vars and name != self._current():
+        if name in self._vars and name != self._mod.current_name():
             self._cancel_pending()
-            self._preview(name)
+            self._mod.preview(name)
             self._apply()
 
     def _closed(self, event) -> None:
         # after_idle, not now: on a click Tk unposts (this event) before running
         # the entry command, so reverting here would undo the commit.
-        if self._current() != self._committed() and self._revert_id is None:
+        if self._dirty() and self._revert_id is None:
             self._revert_id = root.after_idle(self._revert)
 
     def _revert(self) -> None:
         self._revert_id = None
-        if self._current() != self._committed():
-            self._clear_preview()
+        if self._dirty():
+            self._mod.clear_preview()
             self._apply()
 
     def _select(self, name: str) -> None:
@@ -216,125 +203,71 @@ class _PreviewMenu:
         # Clicking a checkbutton toggled one var; re-sync them all.
         for n, var in self._vars.items():
             var.set(n == name)
-        if name == self._committed():
-            if self._current() != name:  # drop a still-showing preview
-                self._clear_preview()
+        if name == self._mod.committed_name():
+            if self._dirty():  # a preview of another entry is still showing
+                self._mod.clear_preview()
                 self._apply()
         else:
-            self._commit(name)
+            self._mod.set_current(name)
+            self._commit()
 
 
 def _apply_theme_preview() -> None:
-    (_theme_preview_hook or refresh_theme)()
+    (_hooks.get('theme_preview') or refresh_theme)()
 
 
-def _paint_background() -> None:
-    if _background_hook is not None:
-        _background_hook()
+def _rebuild_or_refresh() -> None:
+    (_hooks.get('rebuild') or refresh_theme)()
 
 
-def _paint_lines() -> None:
-    if _linestyle_hook is not None:
-        _linestyle_hook()
+_theme_ctl = _PreviewMenu(theme, apply=_apply_theme_preview, commit=_rebuild_or_refresh)
+_background_ctl = _PreviewMenu(background, apply=lambda: _run_hook('background'))
+_linestyle_ctl = _PreviewMenu(linestyle, apply=lambda: _run_hook('linestyle'))
 
 
-def _commit_theme(name: str) -> None:
-    theme.set_current(name)
-    (_rebuild_hook or refresh_theme)()
+def _modal(title: str) -> tuple[tk.Toplevel, ttk.Frame]:
+    """A centred, non-resizable, application-modal dialog. Returns (window, body
+    frame); the caller packs content into the frame, then calls _center_to_content."""
+    win = tk.Toplevel(bg=theme.current().bg)
+    win.title(title)
+    win.resizable(False, False)
+    win.transient(root)
+    win.attributes('-topmost', True)
+    win.grab_set()
 
-
-def _commit_background(name: str) -> None:
-    background.set_current(name)
-    _paint_background()
-
-
-def _commit_linestyle(name: str) -> None:
-    linestyle.set_current(name)
-    _paint_lines()
-
-
-_theme_ctl = _PreviewMenu(
-    theme.THEMES,
-    current=theme.current_name, committed=theme.committed_name,
-    preview=theme.preview, clear_preview=theme.clear_preview,
-    apply=_apply_theme_preview, commit=_commit_theme,
-)
-_background_ctl = _PreviewMenu(
-    background.NAMES,
-    current=background.current_name, committed=background.committed_name,
-    preview=background.preview, clear_preview=background.clear_preview,
-    apply=_paint_background, commit=_commit_background,
-)
-_linestyle_ctl = _PreviewMenu(
-    linestyle.NAMES,
-    current=linestyle.current_name, committed=linestyle.committed_name,
-    preview=linestyle.preview, clear_preview=linestyle.clear_preview,
-    apply=_paint_lines, commit=_commit_linestyle,
-)
+    frame = ttk.Frame(win)
+    frame.pack(padx=scaled(15))
+    return win, frame
 
 
 def _show_instructions():
-    instr_win = tk.Toplevel(bg=theme.current().bg)
-    instr_win.title('Instructions')
-    instr_win.resizable(False, False)
-    instr_win.transient(root)
-    instr_win.attributes('-topmost', True)
-    instr_win.grab_set()
-
-    instr_frame = ttk.Frame(instr_win)
-    instr_frame.pack(padx=scaled(15))
-
-    instr_text = '1. Think of a problem\n' \
-                 '2. Turn it into an open-ended question\n' \
-                 '3. Write the question into the application (optional, but helps with step 4)\n' \
-                 '4. Focus on it\n' \
-                 '5. Toss coins until a hexagram is formed\n' \
-                 '6. Consult external resources of your choice for detailed line meanings\n\n' \
-                 'The left hexagram explains your current position regarding your question,\n' \
-                 'with its stressed lines explaining what can be done about it.\n\n' \
-                 'The right hexagram foretells the possible future if the oracle\'s advice is heeded.'
-
-    instr_label = ttk.Label(instr_win, text=instr_text, font=('TkDefaultFont', scaled(10)))
-    instr_label.pack(in_=instr_frame, pady=scaled(20))
-
-    _center_to_content(instr_win, scaled(600), scaled(250))
+    win, frame = _modal('Instructions')
+    text = (
+        '1. Think of a problem\n'
+        '2. Turn it into an open-ended question\n'
+        '3. Write the question into the application (optional, but helps with step 4)\n'
+        '4. Focus on it\n'
+        '5. Toss coins until a hexagram is formed\n'
+        '6. Consult external resources of your choice for detailed line meanings\n\n'
+        'The left hexagram explains your current position regarding your question,\n'
+        'with its stressed lines explaining what can be done about it.\n\n'
+        "The right hexagram foretells the possible future if the oracle's advice is heeded."
+    )
+    ttk.Label(win, text=text, font=('TkDefaultFont', scaled(10))).pack(in_=frame, pady=scaled(20))
+    _center_to_content(win, scaled(600), scaled(250))
 
 
 def _show_about():
-    about_win = tk.Toplevel(bg=theme.current().bg)
-    about_win.title('About')
-    about_win.resizable(False, False)
-    about_win.transient(root)
-    about_win.attributes('-topmost', True)
-    about_win.grab_set()
-
-    about_frame = ttk.Frame(about_win)
-    about_frame.pack(padx=scaled(15))
-
-    about_title = 'Three Coins'
-    about_ver = 'v2.0.0'
-    about_body = 'I Ching divination using the 3-coin method'
-    about_footer = 'Copyright (c) 2023-2026 Filip Krnjaković\n' \
-                   'github.com/filip-kr/three-coins'
-
-    about_icon_label = ttk.Label(about_win, image=icon)
-    about_icon_label.pack(in_=about_frame, pady=scaled(15))
-
-    about_title_label = ttk.Label(about_win, text=about_title, font=('TkDefaultFont', scaled(10), 'bold'))
-    about_title_label.pack(in_=about_frame)
-
-    about_ver_label = ttk.Label(about_win, text=about_ver, font=('TkDefaultFont', scaled(10)))
-    about_ver_label.pack(in_=about_frame)
-
-    about_body_label = ttk.Label(about_win, text=about_body, font=('TkDefaultFont', scaled(10)))
-    about_body_label.pack(in_=about_frame, pady=scaled(20))
-
-    about_footer_label = ttk.Label(
-        about_win, text=about_footer, justify=tk.CENTER, font=('TkDefaultFont', scaled(8)),
-    )
-    about_footer_label.pack(in_=about_frame, pady=scaled(10))
-
-    _center_to_content(about_win, scaled(300), scaled(300))
+    win, frame = _modal('About')
+    footer = 'Copyright (c) 2023-2026 Filip Krnjaković\ngithub.com/filip-kr/three-coins'
+    ttk.Label(win, image=icon).pack(in_=frame, pady=scaled(15))
+    ttk.Label(win, text='Three Coins', font=('TkDefaultFont', scaled(10), 'bold')).pack(in_=frame)
+    ttk.Label(win, text='v2.0.0', font=('TkDefaultFont', scaled(10))).pack(in_=frame)
+    ttk.Label(win, text='I Ching divination using the 3-coin method',
+              font=('TkDefaultFont', scaled(10))).pack(in_=frame, pady=scaled(20))
+    ttk.Label(win, text=footer, justify=tk.CENTER,
+              font=('TkDefaultFont', scaled(8))).pack(in_=frame, pady=scaled(10))
+    _center_to_content(win, scaled(300), scaled(300))
 
 
 def build():
@@ -352,7 +285,7 @@ def build():
     root.title('Three Coins')
     root.resizable(False, False)
 
-    current_label, width, height = settings.load_resolution()
+    current_label, width, _height = settings.load_resolution()
     _current_resolution_label = current_label
     scale = width / _BASE_SIZE
 

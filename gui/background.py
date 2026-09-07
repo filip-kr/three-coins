@@ -5,42 +5,42 @@ from gui import settings
 NONE = 'None'
 
 
-def _grid(c, w, h, color):
-    step = max(20, w // 10)
-    for x in range(step, w, step):
-        c.create_line(x, 0, x, h, fill=color, tags=('bg',))
-    for y in range(step, h, step):
-        c.create_line(0, y, w, y, fill=color, tags=('bg',))
+def _grid(canvas, width, height, color):
+    step = max(20, width // 10)
+    for x in range(step, width, step):
+        canvas.create_line(x, 0, x, height, fill=color, tags=('bg',))
+    for y in range(step, height, step):
+        canvas.create_line(0, y, width, y, fill=color, tags=('bg',))
 
 
-def _rings(c, w, h, color):
-    cx, cy, step = w // 2, h // 2, max(24, w // 8)
-    for r in range(step, max(w, h), step):
-        c.create_oval(cx - r, cy - r, cx + r, cy + r, outline=color, tags=('bg',))
+def _rings(canvas, width, height, color):
+    cx, cy, step = width // 2, height // 2, max(24, width // 8)
+    for r in range(step, max(width, height), step):
+        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=color, tags=('bg',))
 
 
-def _hatch(c, w, h, color):
-    for d in range(-h, w, max(18, w // 12)):  # 45-degree lines, top-left to bottom-right
-        c.create_line(d, 0, d + h, h, fill=color, tags=('bg',))
+def _hatch(canvas, width, height, color):
+    for d in range(-height, width, max(18, width // 12)):  # 45-degree, top-left to bottom-right
+        canvas.create_line(d, 0, d + height, height, fill=color, tags=('bg',))
 
 
-def _dots(c, w, h, color):
-    step, rad = max(22, w // 10), max(1, w // 200)
-    for x in range(step, w, step):
-        for y in range(step, h, step):
-            c.create_oval(x - rad, y - rad, x + rad, y + rad, fill=color, outline=color, tags=('bg',))
+def _dots(canvas, width, height, color):
+    step, rad = max(22, width // 10), max(1, width // 200)
+    for x in range(step, width, step):
+        for y in range(step, height, step):
+            canvas.create_oval(x - rad, y - rad, x + rad, y + rad, fill=color, outline=color, tags=('bg',))
 
 
-def _bagua(c, w, h, color):
-    cx, cy, r = w // 2, h // 2, min(w, h) // 2 - 8
+def _bagua(canvas, width, height, color):
+    cx, cy, r = width // 2, height // 2, min(width, height) // 2 - 8
     corners = [
         (cx + r * math.cos(math.pi / 8 + i * math.pi / 4), cy + r * math.sin(math.pi / 8 + i * math.pi / 4))
         for i in range(8)
     ]
     for i, (x0, y0) in enumerate(corners):
         x1, y1 = corners[(i + 1) % 8]
-        c.create_line(x0, y0, x1, y1, fill=color, tags=('bg',))
-    c.create_oval(cx - r // 2, cy - r // 2, cx + r // 2, cy + r // 2, outline=color, tags=('bg',))
+        canvas.create_line(x0, y0, x1, y1, fill=color, tags=('bg',))
+    canvas.create_oval(cx - r // 2, cy - r // 2, cx + r // 2, cy + r // 2, outline=color, tags=('bg',))
 
 
 # Faint backdrops behind the hexagram lines, one per theme, drawn in palette.border.
@@ -86,6 +86,6 @@ def draw(canvas, palette) -> None:
     canvas.delete('bg')
     if _current == NONE:
         return
-    w, h = int(canvas.cget('width')), int(canvas.cget('height'))
-    _PATTERNS[_current](canvas, w, h, palette.border)
+    width, height = int(canvas.cget('width')), int(canvas.cget('height'))
+    _PATTERNS[_current](canvas, width, height, palette.border)
     canvas.tag_lower('bg')
