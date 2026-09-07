@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.1.1 - 2026-09-07
+
+### Fixed
+
+- **Hexagram backgrounds now sit square in the frame.** Grid and Dots were anchored to the top-left corner, leaving a wider gap along the bottom and right edges; they now split the frame into whole cells that meet all four corners, with the frame border itself as the outermost line. Hatch ran at a fixed 45 degrees and bunched toward the top-left corner - it now runs parallel to the frame's diagonal, one line spanning corner to corner. Rings and Bagua were up to half a pixel off-center at non-default resolutions and are now exactly centered.
+- **The question field and hexagram tabs scale with the resolution.** The question box's border width and inner padding, and the tab padding, were fixed pixel values that didn't scale with the rest of the UI, so they looked progressively thinner and tighter at larger resolutions.
+
+### Changed
+
+- About dialog now shows `v2.1.1`.
+
+### Internal
+
+- `_TOP_LINE_Y` (`gui/output.py`) is now derived from the canvas height and line spacing instead of a hand-tuned constant, so the six-line hexagram stays vertically centered if either changes.
+- `_bagua`'s inset from the frame edge scales with width, like the other background patterns.
+- Trimmed a few redundant comments and one that had gone stale.
+
 ## v2.1.0 - 2026-09-07
 
 ### Added
