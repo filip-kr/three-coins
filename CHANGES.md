@@ -1,5 +1,31 @@
 # Changelog
 
+## v2.1.0 - 2026-09-07
+
+### Added
+
+- **Selectable hexagram backgrounds.** Settings > Background offers `None` (default) plus five procedural backdrops - Grid, Rings, Hatch, Dots, Bagua - drawn faintly behind the hexagram lines and tinted to the active theme. Remembered between runs.
+- **Selectable line styles.** Settings > Line style offers `Standard` (default), `Round` (rounded ends), and `Ink` (a painted brush stroke with a shallow upward arch). Every style occupies the same footprint, so switching never resizes the hexagram. Remembered between runs.
+- **Live preview on hover.** Hovering an entry in the Theme, Background, or Line style menu previews it on the spot; the preview reverts if the menu closes without a pick, and commits when one is clicked.
+- **Framed hexagram.** The hexagram now sits in a thin bordered panel instead of floating - larger and higher in the tab than before - and stays put regardless of how long the hexagram's name is.
+- **Word wrap in the question field.** Long lines and over-long words now wrap instead of scrolling out of view.
+- **Ctrl+A selects all** in the question field (previously Tk's default "move cursor to line start").
+
+### Changed
+
+- Hexagram-name font is slightly smaller so the longest names (e.g. "Advance of Consciousness") fit on one line without wrapping.
+- Persistent settings now also store `background` and `line_style` alongside `width`/`height`/`theme` in `settings.json`.
+- About dialog now shows `v2.1.0`.
+
+### Internal
+
+- New `gui/background.py` and `gui/linestyle.py` modules, each a small self-contained drawing + persisted-state unit.
+- A single `_PreviewMenu` class now drives the Theme, Background, and Line style menus (hover preview, revert-on-close, commit), replacing three near-identical implementations.
+- `gui/output.py` groups the per-tab widgets into one `_Tab` record in a `{'true', 'reverse'}` dict, replacing ten module-level globals and the four-argument threading through the draw helpers.
+- `gui` exposes one `set_hook(name, fn)` registry instead of four separate `set_*_hook` functions; a `_modal()` helper builds the Instructions/About dialogs.
+- `three_coins/__main__.py` event handlers moved from nested closures to module functions; `HexagramSession.count` is now a derived property.
+- Codebase-wide comment pass (trimmed verbose/redundant comments) and a `ruff` cleanup (`typing.Callable` -> `collections.abc.Callable`, unused unpack).
+
 ## v2.0.0 - 2026-08-22
 
 ### Added

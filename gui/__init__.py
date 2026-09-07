@@ -262,7 +262,7 @@ def _show_about():
     footer = 'Copyright (c) 2023-2026 Filip Krnjaković\ngithub.com/filip-kr/three-coins'
     ttk.Label(win, image=icon).pack(in_=frame, pady=scaled(15))
     ttk.Label(win, text='Three Coins', font=('TkDefaultFont', scaled(10), 'bold')).pack(in_=frame)
-    ttk.Label(win, text='v2.0.0', font=('TkDefaultFont', scaled(10))).pack(in_=frame)
+    ttk.Label(win, text='v2.1.0', font=('TkDefaultFont', scaled(10))).pack(in_=frame)
     ttk.Label(win, text='I Ching divination using the 3-coin method',
               font=('TkDefaultFont', scaled(10))).pack(in_=frame, pady=scaled(20))
     ttk.Label(win, text=footer, justify=tk.CENTER,

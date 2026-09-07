@@ -41,7 +41,7 @@ sha256sum -c three_coins_vX.X.X.sha256
 
 ### Settings
 
-Resolution and theme preferences are saved to `~/.config/three-coins/settings.json` (or under `$XDG_CONFIG_HOME/three-coins/` instead, if that environment variable is set).
+Resolution, theme, hexagram background, and line-style preferences are saved to `~/.config/three-coins/settings.json` (or under `$XDG_CONFIG_HOME/three-coins/` instead, if that environment variable is set).
 
 <br>
 
