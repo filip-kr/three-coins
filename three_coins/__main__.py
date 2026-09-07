@@ -87,8 +87,14 @@ def main():
 
         gui.finalize()
 
+    def _preview_theme():
+        gui.refresh_theme()
+        gui_input.restyle()
+        gui_output.restyle()
+
     gui.build()
     gui.set_rebuild_hook(_rebuild_ui)
+    gui.set_theme_preview_hook(_preview_theme)
     gui_input.build(_on_toss, _on_reset)
     gui_output.build()
 

@@ -17,13 +17,24 @@ def _select_all(event: tk.Event) -> str:
     return 'break'  # suppress Tk's default (cursor to line start)
 
 
+def _text_colors() -> dict:
+    palette = theme.current()
+    return {
+        'bg': palette.surface, 'fg': palette.ink, 'insertbackground': palette.ink,
+        'highlightbackground': palette.border, 'highlightcolor': palette.accent,
+    }
+
+
+def restyle() -> None:
+    _qstn_txtbox.configure(**_text_colors())
+
+
 def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
     global _input_frame, _qstn_txtbox, toss_btn, rst_btn
 
     s = gui.scaled
     base_size = tkfont.nametofont('TkDefaultFont').cget('size')
     txt_font = ('TkDefaultFont', s(base_size))
-    palette = theme.current()
 
     _input_frame = ttk.Frame(gui.root)
     _input_frame.pack(side=tk.TOP)
@@ -39,9 +50,7 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
 
     _qstn_txtbox = tk.Text(
         qstn, height=4, width=40, font=txt_font, wrap=tk.WORD,
-        bg=palette.surface, fg=palette.ink, insertbackground=palette.ink,
-        highlightthickness=1, highlightbackground=palette.border, highlightcolor=palette.accent,
-        relief=tk.FLAT, padx=8, pady=8,
+        highlightthickness=1, relief=tk.FLAT, padx=8, pady=8, **_text_colors(),
     )
     _qstn_txtbox.pack(side=tk.TOP)
     _qstn_txtbox.focus()

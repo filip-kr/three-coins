@@ -59,6 +59,24 @@ def _build_tab(width: int, height: int) -> ttk.Frame:
     return tab
 
 
+def _style_labels() -> None:
+    palette = theme.current()
+    style = ttk.Style()
+    style.configure('Caption.TLabel', font=('TkDefaultFont', _s(11)), foreground=palette.ink_muted, background=palette.bg)
+    style.configure('Name.TLabel', font=(palette.name_font_family, _s(22)), foreground=palette.ink, background=palette.bg)
+    style.configure('Subtitle.TLabel', font=('TkDefaultFont', _s(13)), foreground=palette.ink_muted, background=palette.bg)
+
+
+def restyle() -> None:
+    """In-place recolor to the current palette (theme preview); hex lines by tag."""
+    palette = theme.current()
+    _style_labels()
+    for canvas in (_true_hex_canvas, _reverse_hex_canvas):
+        canvas.configure(bg=palette.surface)
+        canvas.itemconfigure('ink', fill=palette.ink)
+        canvas.itemconfigure('accent', fill=palette.accent)
+
+
 def _build_tab_content(tab: ttk.Frame, wrap: int) -> tuple[tk.Canvas, ttk.Label, ttk.Label, ttk.Label]:
     s = _s
 
@@ -92,19 +110,10 @@ def build():
     _overframe = ttk.Frame(gui.root)
     _overframe.pack(side=tk.TOP, fill=tk.BOTH, padx=s(20), pady=s(20))
 
-    palette = theme.current()
     style = ttk.Style()
     # width is in characters: a fixed 3 stops the tab resizing as its number changes.
     style.configure('TNotebook.Tab', font=('TkDefaultFont', s(14)), width=3, anchor='center')
-    style.configure(
-        'Caption.TLabel', font=('TkDefaultFont', s(11)), foreground=palette.ink_muted, background=palette.bg,
-    )
-    style.configure(
-        'Name.TLabel', font=(palette.name_font_family, s(22)), foreground=palette.ink, background=palette.bg,
-    )
-    style.configure(
-        'Subtitle.TLabel', font=('TkDefaultFont', s(13)), foreground=palette.ink_muted, background=palette.bg,
-    )
+    _style_labels()
 
     _notebook = ttk.Notebook(_overframe)
     _notebook.pack()
@@ -151,7 +160,11 @@ def _draw_line(canvas: tk.Canvas, position_from_top: int, *, broken: bool, accen
     y = _line_y(position_from_top)
 
     palette = theme.current()
-    kwargs = {'width': _s(_HEX_LINE_WIDTH), 'fill': palette.accent if accent else palette.ink}
+    kwargs = {
+        'width': _s(_HEX_LINE_WIDTH),
+        'fill': palette.accent if accent else palette.ink,
+        'tags': ('accent',) if accent else ('ink',),  # so restyle() can recolor
+    }
     if broken:
         kwargs['dash'] = (_s(80), _s(40))
 

@@ -19,6 +19,8 @@ _MONITOR_RE = re.compile(r'(\d+)x(\d+)\+(\d+)\+(\d+)')
 scale: float = 1.0
 _min_height = 0
 _rebuild_hook = None
+_theme_preview_hook = None
+_theme_revert_id: str | None = None
 _current_resolution_label: str | None = None
 
 
@@ -50,6 +52,13 @@ def set_rebuild_hook(fn) -> None:
     change. Owned by three_coins, which knows how to replay session state."""
     global _rebuild_hook
     _rebuild_hook = fn
+
+
+def set_theme_preview_hook(fn) -> None:
+    """Like set_rebuild_hook, but recolors widgets in place - no rebuild, no
+    persist - for Theme-menu hover preview."""
+    global _theme_preview_hook
+    _theme_preview_hook = fn
 
 
 def refresh_theme() -> None:
@@ -129,14 +138,66 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
         _center_window(root, width, max(height, _min_height))
 
 
-def _on_theme_selected(name: str) -> None:
-    if name == theme.current_name():
-        # Re-clicking the active item - see _on_resolution_selected.
-        _theme_vars[name].set(True)
-        return
+def _apply_theme_preview() -> None:
+    (_theme_preview_hook or refresh_theme)()
 
+
+def _active_menu_label(widget) -> str | None:
+    # event.widget can be a menubar-clone path string, not a widget - go via Tcl.
+    path = widget if isinstance(widget, str) else str(widget)
+    try:
+        index = int(root.tk.call(path, 'index', 'active'))
+    except (tk.TclError, ValueError):
+        return None
+    try:
+        return root.tk.call(path, 'entrycget', index, '-label') or None
+    except tk.TclError:
+        return None
+
+
+def _on_theme_hover(event) -> None:
+    global _theme_revert_id
+    name = _active_menu_label(event.widget)
+    if name not in theme.THEMES or name == theme.current_name():
+        return
+    if _theme_revert_id is not None:
+        root.after_cancel(_theme_revert_id)
+        _theme_revert_id = None
+    theme.preview(name)
+    _apply_theme_preview()
+
+
+def _on_theme_menu_closed(event) -> None:
+    # after_idle, not now: on a click Tk unposts (this event) before running the
+    # entry command, so a direct revert here would undo the commit.
+    global _theme_revert_id
+    if theme.current_name() != theme.committed_name() and _theme_revert_id is None:
+        _theme_revert_id = root.after_idle(_revert_theme_preview)
+
+
+def _revert_theme_preview() -> None:
+    global _theme_revert_id
+    _theme_revert_id = None
+    if theme.current_name() != theme.committed_name():
+        theme.clear_preview()
+        _apply_theme_preview()
+
+
+def _on_theme_selected(name: str) -> None:
+    global _theme_revert_id
+    if _theme_revert_id is not None:
+        root.after_cancel(_theme_revert_id)
+        _theme_revert_id = None
+
+    # Clicking a checkbutton toggled one var; re-sync all (see _on_resolution_selected).
     for theme_name, var in _theme_vars.items():
         var.set(theme_name == name)
+
+    if name == theme.committed_name():
+        if theme.current_name() != name:  # a preview is still showing - drop it
+            theme.clear_preview()
+            _apply_theme_preview()
+        return
 
     theme.set_current(name)
 
@@ -248,13 +309,15 @@ def build():
 
     theme_menu = tk.Menu(settings_menu, tearoff=False)
     for theme_name in theme.THEMES:
-        var = tk.BooleanVar(value=(theme_name == theme.current_name()))
+        var = tk.BooleanVar(value=(theme_name == theme.committed_name()))
         _theme_vars[theme_name] = var
         theme_menu.add_checkbutton(
             label=theme_name,
             variable=var,
             command=lambda n=theme_name: _on_theme_selected(n),
         )
+    theme_menu.bind('<<MenuSelect>>', _on_theme_hover)  # fires on highlight change, i.e. hover
+    theme_menu.bind('<Unmap>', _on_theme_menu_closed)
     settings_menu.add_cascade(label='Theme', menu=theme_menu)
 
     root_menu.add_command(label='About', command=_show_about)

@@ -45,17 +45,23 @@ THEMES: dict[str, Palette] = {
 
 DEFAULT_THEME = 'Parchment'
 
+# _current is painted now; _committed is saved. They differ only mid-preview().
 _current = DEFAULT_THEME
+_committed = DEFAULT_THEME
 
 
 def load_saved() -> None:
-    global _current
+    global _current, _committed
     name = settings.load_theme_name()
-    _current = name if name in THEMES else DEFAULT_THEME
+    _current = _committed = name if name in THEMES else DEFAULT_THEME
 
 
 def current_name() -> str:
     return _current
+
+
+def committed_name() -> str:
+    return _committed
 
 
 def current() -> Palette:
@@ -63,9 +69,20 @@ def current() -> Palette:
 
 
 def set_current(name: str) -> None:
+    global _current, _committed
+    _current = _committed = name
+    settings.save_theme_name(name)
+
+
+def preview(name: str) -> None:
+    """Paint a theme without saving it (menu-hover preview)."""
     global _current
     _current = name
-    settings.save_theme_name(name)
+
+
+def clear_preview() -> None:
+    global _current
+    _current = _committed
 
 
 def apply(root) -> None:
