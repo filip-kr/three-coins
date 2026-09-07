@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 import gui
-from gui import theme
+from gui import background, theme
 from helper.line_type import LineType
 
 _overframe: ttk.Frame | None = None
@@ -23,6 +23,7 @@ _HEX_CANVAS_WIDTH = 340
 _HEX_CANVAS_HEIGHT = 350
 _HEX_LINE_MARGIN = (_HEX_CANVAS_WIDTH - 200) // 2
 _HEX_LINE_WIDTH = 14
+_HEX_TOP_PAD = 115  # see _build_tab_content
 
 # Fixed, not measured from content, so tab contents never shift on a redraw.
 _TAB_CONTENT_HEIGHT = 660
@@ -55,7 +56,7 @@ def _split_name(name: str) -> tuple[str, str]:
 
 def _build_tab(width: int, height: int) -> ttk.Frame:
     tab = ttk.Frame(_notebook, width=width, height=height)
-    tab.pack_propagate(False)  # hold (width, height); don't shrink to fit labels
+    tab.pack_propagate(False)  # hold (width, height); don't shrink to fit the content
     return tab
 
 
@@ -63,34 +64,46 @@ def _style_labels() -> None:
     palette = theme.current()
     style = ttk.Style()
     style.configure('Caption.TLabel', font=('TkDefaultFont', _s(11)), foreground=palette.ink_muted, background=palette.bg)
-    style.configure('Name.TLabel', font=(palette.name_font_family, _s(22)), foreground=palette.ink, background=palette.bg)
+    style.configure('Name.TLabel', font=(palette.name_font_family, _s(18)), foreground=palette.ink, background=palette.bg)
     style.configure('Subtitle.TLabel', font=('TkDefaultFont', _s(13)), foreground=palette.ink_muted, background=palette.bg)
 
 
+def _canvases() -> tuple[tk.Canvas, tk.Canvas]:
+    return _true_hex_canvas, _reverse_hex_canvas
+
+
+def redraw_background() -> None:
+    for canvas in _canvases():
+        background.draw(canvas, theme.current())
+
+
 def restyle() -> None:
-    """In-place recolor to the current palette (theme preview); hex lines by tag."""
+    """Recolor the built widgets to the current palette in place (theme preview)."""
     palette = theme.current()
     _style_labels()
-    for canvas in (_true_hex_canvas, _reverse_hex_canvas):
-        canvas.configure(bg=palette.surface)
+    for canvas in _canvases():
+        canvas.configure(bg=palette.surface, highlightbackground=palette.ink_muted, highlightcolor=palette.ink_muted)
         canvas.itemconfigure('ink', fill=palette.ink)
         canvas.itemconfigure('accent', fill=palette.accent)
+        background.draw(canvas, palette)
 
 
-def _build_tab_content(tab: ttk.Frame, wrap: int) -> tuple[tk.Canvas, ttk.Label, ttk.Label, ttk.Label]:
-    s = _s
+def _build_tab_content(tab: ttk.Frame, wrap: int) -> tuple:
+    palette = theme.current()
 
-    canvas = tk.Canvas(
-        tab, width=s(_HEX_CANVAS_WIDTH), height=s(_HEX_CANVAS_HEIGHT),
-        bg=theme.current().surface, highlightthickness=0, bd=0,
-    )
-    canvas.pack(side=tk.TOP, pady=(s(20), s(16)))
+    # Everything packs top-down in the fixed-size tab: the frame sits at a fixed
+    # offset and a long (wrapped) name grows downward instead of nudging it.
+    canvas = tk.Canvas(tab, width=_s(_HEX_CANVAS_WIDTH), height=_s(_HEX_CANVAS_HEIGHT),
+                       bg=palette.surface, bd=0, highlightthickness=_s(1),
+                       highlightbackground=palette.ink_muted, highlightcolor=palette.ink_muted)
+    canvas.pack(side=tk.TOP, pady=(_s(_HEX_TOP_PAD), _s(16)))
+    background.draw(canvas, palette)
 
     caption = ttk.Label(tab, style='Caption.TLabel', justify=tk.CENTER, anchor=tk.CENTER)
     caption.pack(side=tk.TOP)
 
     name = ttk.Label(tab, style='Name.TLabel', justify=tk.CENTER, anchor=tk.CENTER, wraplength=wrap)
-    name.pack(side=tk.TOP, pady=(s(4), 0))
+    name.pack(side=tk.TOP, pady=(_s(4), 0))
 
     subtitle = ttk.Label(tab, style='Subtitle.TLabel', justify=tk.CENTER, anchor=tk.CENTER, wraplength=wrap)
     subtitle.pack(side=tk.TOP)
@@ -110,9 +123,8 @@ def build():
     _overframe = ttk.Frame(gui.root)
     _overframe.pack(side=tk.TOP, fill=tk.BOTH, padx=s(20), pady=s(20))
 
-    style = ttk.Style()
     # width is in characters: a fixed 3 stops the tab resizing as its number changes.
-    style.configure('TNotebook.Tab', font=('TkDefaultFont', s(14)), width=3, anchor='center')
+    ttk.Style().configure('TNotebook.Tab', font=('TkDefaultFont', s(14)), width=3, anchor='center')
     _style_labels()
 
     _notebook = ttk.Notebook(_overframe)
@@ -120,19 +132,17 @@ def build():
 
     tab_width = gui.target_width() - s(80)
     tab_height = s(_TAB_CONTENT_HEIGHT)
-    wrap = tab_width - s(40)
+    wrap = tab_width - s(40)  # wide: real hexagram names then fit on one line
 
     _true_tab = _build_tab(tab_width, tab_height)
     _notebook.add(_true_tab, text='')
-    _true_hex_canvas, _true_caption_label, _true_name_label, _true_subtitle_label = _build_tab_content(
-        _true_tab, wrap,
-    )
+    (_true_hex_canvas, _true_caption_label,
+     _true_name_label, _true_subtitle_label) = _build_tab_content(_true_tab, wrap)
 
     _reverse_tab = _build_tab(tab_width, tab_height)
     _notebook.add(_reverse_tab, text='')
-    _reverse_hex_canvas, _reverse_caption_label, _reverse_name_label, _reverse_subtitle_label = _build_tab_content(
-        _reverse_tab, wrap,
-    )
+    (_reverse_hex_canvas, _reverse_caption_label,
+     _reverse_name_label, _reverse_subtitle_label) = _build_tab_content(_reverse_tab, wrap)
     _notebook.tab(_reverse_tab, state=tk.DISABLED)
 
     gui.root.update_idletasks()
@@ -214,8 +224,9 @@ def draw_no_change(true_hex: tuple, lines: list[LineType]):
 
 
 def canvas_reset():
-    _true_hex_canvas.delete('all')
-    _reverse_hex_canvas.delete('all')
+    for canvas in _canvases():
+        canvas.delete('all')
+    redraw_background()
     for tab, caption, name, subtitle in (
         (_true_tab, _true_caption_label, _true_name_label, _true_subtitle_label),
         (_reverse_tab, _reverse_caption_label, _reverse_name_label, _reverse_subtitle_label),

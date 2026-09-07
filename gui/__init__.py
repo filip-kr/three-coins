@@ -3,14 +3,13 @@ import subprocess
 import tkinter as tk
 from tkinter import ttk
 
-from gui import settings, theme
+from gui import background, settings, theme
 from gui.asset.icon import icon_str
 
 root = tk.Tk()
 icon = tk.PhotoImage(data=icon_str)
 
 _resolution_vars: dict[str, tk.BooleanVar] = {}
-_theme_vars: dict[str, tk.BooleanVar] = {}
 _menus: list[tk.Menu] = []
 
 _BASE_SIZE = settings.RESOLUTIONS[0][1]
@@ -20,7 +19,7 @@ scale: float = 1.0
 _min_height = 0
 _rebuild_hook = None
 _theme_preview_hook = None
-_theme_revert_id: str | None = None
+_background_hook = None
 _current_resolution_label: str | None = None
 
 
@@ -59,6 +58,12 @@ def set_theme_preview_hook(fn) -> None:
     persist - for Theme-menu hover preview."""
     global _theme_preview_hook
     _theme_preview_hook = fn
+
+
+def set_background_hook(fn) -> None:
+    """Register the callback that repaints the canvas backdrops (Background menu)."""
+    global _background_hook
+    _background_hook = fn
 
 
 def refresh_theme() -> None:
@@ -138,10 +143,6 @@ def _on_resolution_selected(label: str, width: int, height: int) -> None:
         _center_window(root, width, max(height, _min_height))
 
 
-def _apply_theme_preview() -> None:
-    (_theme_preview_hook or refresh_theme)()
-
-
 def _active_menu_label(widget) -> str | None:
     # event.widget can be a menubar-clone path string, not a widget - go via Tcl.
     path = widget if isinstance(widget, str) else str(widget)
@@ -155,56 +156,97 @@ def _active_menu_label(widget) -> str | None:
         return None
 
 
-def _on_theme_hover(event) -> None:
-    global _theme_revert_id
-    name = _active_menu_label(event.widget)
-    if name not in theme.THEMES or name == theme.current_name():
-        return
-    if _theme_revert_id is not None:
-        root.after_cancel(_theme_revert_id)
-        _theme_revert_id = None
-    theme.preview(name)
-    _apply_theme_preview()
+class _PreviewMenu:
+    """A Settings submenu that previews an entry on hover and reverts if it closes
+    with no pick. Theme and Background each configure one with their own callbacks."""
+
+    def __init__(self, names, *, current, committed, preview, clear_preview, apply, commit):
+        self._names = list(names)
+        self._current, self._committed = current, committed
+        self._preview, self._clear_preview = preview, clear_preview
+        self._apply, self._commit = apply, commit
+        self._vars: dict[str, tk.BooleanVar] = {}
+        self._revert_id: str | None = None
+
+    def build(self, parent: tk.Menu, label: str) -> tk.Menu:
+        menu = tk.Menu(parent, tearoff=False)
+        for name in self._names:
+            var = tk.BooleanVar(value=(name == self._committed()))
+            self._vars[name] = var
+            menu.add_checkbutton(label=name, variable=var, command=lambda n=name: self._select(n))
+        menu.bind('<<MenuSelect>>', self._hover)  # fires on highlight change, i.e. hover
+        menu.bind('<Unmap>', self._closed)
+        parent.add_cascade(label=label, menu=menu)
+        return menu
+
+    def _cancel_pending(self) -> None:
+        if self._revert_id is not None:
+            root.after_cancel(self._revert_id)
+            self._revert_id = None
+
+    def _hover(self, event) -> None:
+        name = _active_menu_label(event.widget)
+        if name in self._vars and name != self._current():
+            self._cancel_pending()
+            self._preview(name)
+            self._apply()
+
+    def _closed(self, event) -> None:
+        # after_idle, not now: on a click Tk unposts (this event) before running
+        # the entry command, so reverting here would undo the commit.
+        if self._current() != self._committed() and self._revert_id is None:
+            self._revert_id = root.after_idle(self._revert)
+
+    def _revert(self) -> None:
+        self._revert_id = None
+        if self._current() != self._committed():
+            self._clear_preview()
+            self._apply()
+
+    def _select(self, name: str) -> None:
+        self._cancel_pending()
+        # Clicking a checkbutton toggled one var; re-sync them all.
+        for n, var in self._vars.items():
+            var.set(n == name)
+        if name == self._committed():
+            if self._current() != name:  # drop a still-showing preview
+                self._clear_preview()
+                self._apply()
+        else:
+            self._commit(name)
 
 
-def _on_theme_menu_closed(event) -> None:
-    # after_idle, not now: on a click Tk unposts (this event) before running the
-    # entry command, so a direct revert here would undo the commit.
-    global _theme_revert_id
-    if theme.current_name() != theme.committed_name() and _theme_revert_id is None:
-        _theme_revert_id = root.after_idle(_revert_theme_preview)
+def _apply_theme_preview() -> None:
+    (_theme_preview_hook or refresh_theme)()
 
 
-def _revert_theme_preview() -> None:
-    global _theme_revert_id
-    _theme_revert_id = None
-    if theme.current_name() != theme.committed_name():
-        theme.clear_preview()
-        _apply_theme_preview()
+def _paint_background() -> None:
+    if _background_hook is not None:
+        _background_hook()
 
 
-def _on_theme_selected(name: str) -> None:
-    global _theme_revert_id
-    if _theme_revert_id is not None:
-        root.after_cancel(_theme_revert_id)
-        _theme_revert_id = None
-
-    # Clicking a checkbutton toggled one var; re-sync all (see _on_resolution_selected).
-    for theme_name, var in _theme_vars.items():
-        var.set(theme_name == name)
-
-    if name == theme.committed_name():
-        if theme.current_name() != name:  # a preview is still showing - drop it
-            theme.clear_preview()
-            _apply_theme_preview()
-        return
-
+def _commit_theme(name: str) -> None:
     theme.set_current(name)
+    (_rebuild_hook or refresh_theme)()
 
-    if _rebuild_hook is not None:
-        _rebuild_hook()
-    else:
-        refresh_theme()
+
+def _commit_background(name: str) -> None:
+    background.set_current(name)
+    _paint_background()
+
+
+_theme_ctl = _PreviewMenu(
+    theme.THEMES,
+    current=theme.current_name, committed=theme.committed_name,
+    preview=theme.preview, clear_preview=theme.clear_preview,
+    apply=_apply_theme_preview, commit=_commit_theme,
+)
+_background_ctl = _PreviewMenu(
+    background.NAMES,
+    current=background.current_name, committed=background.committed_name,
+    preview=background.preview, clear_preview=background.clear_preview,
+    apply=_paint_background, commit=_commit_background,
+)
 
 
 def _show_instructions():
@@ -278,6 +320,7 @@ def build():
     root.withdraw()
 
     theme.load_saved()
+    background.load_saved()
     theme.apply(root)
 
     root.iconphoto(True, icon)
@@ -307,22 +350,12 @@ def build():
         )
     settings_menu.add_cascade(label='Resolution', menu=resolution_menu)
 
-    theme_menu = tk.Menu(settings_menu, tearoff=False)
-    for theme_name in theme.THEMES:
-        var = tk.BooleanVar(value=(theme_name == theme.committed_name()))
-        _theme_vars[theme_name] = var
-        theme_menu.add_checkbutton(
-            label=theme_name,
-            variable=var,
-            command=lambda n=theme_name: _on_theme_selected(n),
-        )
-    theme_menu.bind('<<MenuSelect>>', _on_theme_hover)  # fires on highlight change, i.e. hover
-    theme_menu.bind('<Unmap>', _on_theme_menu_closed)
-    settings_menu.add_cascade(label='Theme', menu=theme_menu)
+    theme_menu = _theme_ctl.build(settings_menu, 'Theme')
+    background_menu = _background_ctl.build(settings_menu, 'Background')
 
     root_menu.add_command(label='About', command=_show_about)
 
-    _menus[:] = [root_menu, settings_menu, resolution_menu, theme_menu]
+    _menus[:] = [root_menu, settings_menu, resolution_menu, theme_menu, background_menu]
     for menu in _menus:
         theme.style_menu(menu)
 

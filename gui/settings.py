@@ -58,3 +58,12 @@ def load_theme_name() -> str | None:
 
 def save_theme_name(name: str) -> None:
     _save_data({'theme': name})
+
+
+def load_background_name() -> str | None:
+    name = _load_data().get('background')
+    return name if isinstance(name, str) else None
+
+
+def save_background_name(name: str) -> None:
+    _save_data({'background': name})
