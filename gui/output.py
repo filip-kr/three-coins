@@ -28,17 +28,17 @@ _lines: dict[str, list] = {'true': [], 'reverse': []}
 _scale = 1.0
 
 # Geometry in unscaled px; run through _s() at draw time.
-_HEX_CANVAS_WIDTH = 340
-_HEX_CANVAS_HEIGHT = 350
-_HEX_LINE_SPAN = 200
+_HEX_CANVAS_WIDTH = 420
+_HEX_CANVAS_HEIGHT = 430
+_HEX_LINE_SPAN = 250
 _HEX_LINE_MARGIN = (_HEX_CANVAS_WIDTH - _HEX_LINE_SPAN) // 2
-_HEX_LINE_WIDTH = 14
-_LINE_SPACING = 50
-_TOP_LINE_Y = 50
-_HEX_TOP_PAD = 115  # gap above the frame; see _build_tab_content
+_HEX_LINE_WIDTH = 18
+_LINE_SPACING = 62
+_TOP_LINE_Y = 60
+_HEX_TOP_PAD = 65  # gap above the frame; see _build_tab_content
 
 # Fixed, not measured from content, so tab contents never shift on a redraw.
-_TAB_CONTENT_HEIGHT = 660
+_TAB_CONTENT_HEIGHT = 710
 
 
 def _s(value: float) -> int:
