@@ -34,7 +34,7 @@ _HEX_LINE_SPAN = 250
 _HEX_LINE_MARGIN = (_HEX_CANVAS_WIDTH - _HEX_LINE_SPAN) // 2
 _HEX_LINE_WIDTH = 18
 _LINE_SPACING = 62
-_TOP_LINE_Y = 60
+_TOP_LINE_Y = (_HEX_CANVAS_HEIGHT - 5 * _LINE_SPACING) // 2  # centres the 6-line stack
 _HEX_TOP_PAD = 65  # gap above the frame; see _build_tab_content
 
 # Fixed, not measured from content, so tab contents never shift on a redraw.

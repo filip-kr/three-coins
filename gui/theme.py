@@ -1,6 +1,7 @@
 from tkinter import ttk
 from typing import NamedTuple
 
+import gui
 from gui import settings
 
 
@@ -107,7 +108,8 @@ def apply(root) -> None:
     )
     style.configure('TNotebook', background=palette.bg, bordercolor=palette.border)
     style.configure(
-        'TNotebook.Tab', background=palette.tab_unselected, foreground=palette.ink_muted, padding=(12, 6),
+        'TNotebook.Tab', background=palette.tab_unselected, foreground=palette.ink_muted,
+        padding=(gui.scaled(12), gui.scaled(6)),
     )
     style.map(
         'TNotebook.Tab',

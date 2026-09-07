@@ -50,7 +50,7 @@ def build(on_toss: Callable[[], None], on_reset: Callable[[], None]):
 
     _question = tk.Text(
         question_frame, height=4, width=40, font=txt_font, wrap=tk.WORD,
-        highlightthickness=1, relief=tk.FLAT, padx=8, pady=8, **_text_colors(),
+        highlightthickness=s(1), relief=tk.FLAT, padx=s(8), pady=s(8), **_text_colors(),
     )
     _question.pack(side=tk.TOP)
     _question.focus()

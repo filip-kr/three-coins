@@ -5,34 +5,43 @@ from gui import settings
 NONE = 'None'
 
 
+def _divisions(span, step):
+    """Interior positions splitting span into whole cells ~`step` apart, so the
+    frame border is the outer line and the cells meet the frame corners."""
+    n = max(1, round(span / step))
+    return [i * span / n for i in range(1, n)]
+
+
 def _grid(canvas, width, height, color):
     step = max(20, width // 10)
-    for x in range(step, width, step):
+    for x in _divisions(width, step):
         canvas.create_line(x, 0, x, height, fill=color, tags=('bg',))
-    for y in range(step, height, step):
+    for y in _divisions(height, step):
         canvas.create_line(0, y, width, y, fill=color, tags=('bg',))
 
 
 def _rings(canvas, width, height, color):
-    cx, cy, step = width // 2, height // 2, max(24, width // 8)
+    cx, cy, step = width / 2, height / 2, max(24, width // 8)
     for r in range(step, max(width, height), step):
         canvas.create_oval(cx - r, cy - r, cx + r, cy + r, outline=color, tags=('bg',))
 
 
 def _hatch(canvas, width, height, color):
-    for d in range(-height, width, max(18, width // 12)):  # 45-degree, top-left to bottom-right
-        canvas.create_line(d, 0, d + height, height, fill=color, tags=('bg',))
+    step = max(18, width // 12)
+    reach = width // step + 1
+    for k in range(-reach, reach + 1):  # parallel to the frame diagonal
+        canvas.create_line(k * step, 0, k * step + width, height, fill=color, tags=('bg',))
 
 
 def _dots(canvas, width, height, color):
     step, rad = max(22, width // 10), max(1, width // 200)
-    for x in range(step, width, step):
-        for y in range(step, height, step):
+    for x in _divisions(width, step):
+        for y in _divisions(height, step):
             canvas.create_oval(x - rad, y - rad, x + rad, y + rad, fill=color, outline=color, tags=('bg',))
 
 
 def _bagua(canvas, width, height, color):
-    cx, cy, r = width // 2, height // 2, min(width, height) // 2 - 8
+    cx, cy, r = width / 2, height / 2, min(width, height) // 2 - max(8, width // 52)
     corners = [
         (cx + r * math.cos(math.pi / 8 + i * math.pi / 4), cy + r * math.sin(math.pi / 8 + i * math.pi / 4))
         for i in range(8)
